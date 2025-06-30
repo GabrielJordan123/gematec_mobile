@@ -54,3 +54,4 @@ Saved Games/
 !src/
 !tsconfig.json
 !eas.json
+.env
