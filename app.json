@@ -6,14 +6,16 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
+    "scheme": "gematec",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cisuno7.gematec"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +24,9 @@
       },
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
       "package": "com.cisuno7.gematec",
       "versionCode": 1,
@@ -31,7 +35,8 @@
       "minSdkVersion": 24
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single"
     },
     "plugins": [
       [
@@ -44,6 +49,12 @@
             "buildToolsVersion": "35.0.0",
             "minSdkVersion": 24
           }
+        }
+      ],
+      [
+        "expo-router",
+        {
+          "root": "./app"
         }
       ]
     ],
