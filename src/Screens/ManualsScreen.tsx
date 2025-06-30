@@ -1,0 +1,240 @@
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { RouteProp } from "@react-navigation/native";
+import { DrawerNavigationProp } from "@react-navigation/drawer";
+import { RootStackParamList } from "../Routers/AppRouter";
+import ManualService from "../Services/ManualService";
+import { usePermissions } from "../Context/PermissionsContext";
+import { Manual, Category } from "../Models/Manual";
+
+interface ManualsScreenProps {
+  route: RouteProp<RootStackParamList, "ManualsScreen">;
+  navigation: DrawerNavigationProp<RootStackParamList, "ManualsScreen">;
+}
+
+const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
+  const { hasPermission, permissions } = usePermissions();
+  const [manuals, setManuals] = useState<Manual[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [page, setPage] = useState(1);
+  const [perPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
+  if (permissions.length === 0 && loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.emptyText}>Carregando permissões...</Text>
+      </View>
+    );
+  }
+
+  if (!hasPermission("manuals.view_manual")) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Você não tem permissão para visualizar manuais.</Text>
+      </View>
+    );
+  }
+
+  const fetchManuals = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("access_token");
+      if (!token) throw new Error("Token de acesso não encontrado.");
+
+      const response = await ManualService.fetchManuals({
+        token,
+        page,
+        perPage,
+        search: search.length >= 3 ? search : "",
+        categoryId: selectedCategory ? parseInt(selectedCategory) : undefined,
+      });
+
+      setManuals(response.results || []);
+      setTotalPages(Math.ceil(response.count / perPage) || 1);
+    } catch (error: any) {
+      console.error("[ManualsScreen] Erro ao buscar manuais:", error);
+      Alert.alert("Erro", "Não foi possível carregar os manuais.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const token = await AsyncStorage.getItem("access_token");
+      if (!token) throw new Error("Token de acesso não encontrado.");
+      const response = await ManualService.fetchCategories(token);
+      setCategories(response);
+    } catch (error: any) {
+      console.error("[ManualsScreen] Erro ao buscar categorias:", error);
+      Alert.alert("Erro", "Não foi possível carregar as categorias.");
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    fetchManuals();
+  }, [page, search, selectedCategory]);
+
+  const handleSearch = () => {
+    setPage(1);
+    fetchManuals();
+  };
+
+  const renderManualItem = ({ item }: { item: Manual }) => (
+    <TouchableOpacity
+      style={styles.itemContainer}
+      onPress={() => navigation.navigate("ManualDetailsScreen", { manualId: item.id })}
+    >
+      <Text style={styles.itemText}>Manual: {item.name}</Text>
+      <Text style={styles.itemText}>Categoria: {item.category.name}</Text>
+    </TouchableOpacity>
+  );
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Manuais</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Pesquisar manual (min 3 caracteres)"
+        value={search}
+        onChangeText={setSearch}
+        onSubmitEditing={handleSearch}
+      />
+
+      {loadingCategories ? (
+        <ActivityIndicator size="small" color="#007BFF" />
+      ) : (
+        <Picker
+          selectedValue={selectedCategory}
+          onValueChange={(value) => {
+            setSelectedCategory(value);
+            setPage(1);
+          }}
+          style={styles.picker}
+        >
+          <Picker.Item label="Todas as Categorias" value="" />
+          {categories.map((category) => (
+            <Picker.Item key={category.id} label={category.name} value={category.id.toString()} />
+          ))}
+        </Picker>
+      )}
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#007BFF" />
+      ) : (
+        <>
+          <FlatList
+            data={manuals}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderManualItem}
+            ListEmptyComponent={<Text style={styles.emptyText}>Nenhum manual encontrado.</Text>}
+          />
+          <View style={styles.paginationContainer}>
+            <TouchableOpacity
+              disabled={page === 1}
+              onPress={() => setPage(page - 1)}
+              style={[styles.pageButton, page === 1 && styles.disabledButton]}
+            >
+              <Text style={styles.pageButtonText}>Anterior</Text>
+            </TouchableOpacity>
+            <Text style={styles.pageText}>Página {page} de {totalPages}</Text>
+            <TouchableOpacity
+              disabled={page === totalPages}
+              onPress={() => setPage(page + 1)}
+              style={[styles.pageButton, page === totalPages && styles.disabledButton]}
+            >
+              <Text style={styles.pageButtonText}>Próxima</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#f5f5f5",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  itemContainer: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },
+  itemText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+    color: "#666",
+  },
+  paginationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  pageButton: {
+    backgroundColor: "#007BFF",
+    padding: 10,
+    borderRadius: 5,
+  },
+  pageButtonText: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  disabledButton: {
+    backgroundColor: "#ccc",
+  },
+  pageText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#FF0000",
+    textAlign: "center",
+    marginTop: 20,
+  },
+});
+
+export default ManualsScreen;

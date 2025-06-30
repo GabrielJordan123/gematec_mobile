@@ -1,0 +1,40 @@
+{
+  "name": "gematec",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.1.2",
+    "@react-native-picker/picker": "2.11.0",
+    "@react-navigation/drawer": "^7.3.12",
+    "@react-navigation/stack": "^7.3.2",
+    "axios": "^1.9.0",
+    "expo": "53.0.11",
+    "expo-camera": "~16.1.8",
+    "expo-checkbox": "~4.1.4",
+    "expo-image-picker": "^16.1.4",
+    "expo-linear-gradient": "~14.1.5",
+    "expo-status-bar": "~2.2.3",
+    "jwt-decode": "^4.0.0",
+    "react": "19.0.0",
+    "react-native": "0.79.3",
+    "react-native-markdown-display": "^7.0.2",
+    "react-native-masked-text": "^1.13.0",
+    "react-native-paper": "^5.14.5",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.11.1",
+    "expo-build-properties": "~0.14.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@types/jwt-decode": "^2.2.1",
+    "@types/react": "~19.0.10",
+    "typescript": "~5.8.3"
+  },
+  "private": true
+}
