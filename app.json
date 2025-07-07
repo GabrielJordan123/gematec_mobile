@@ -3,54 +3,28 @@
     "name": "gematec",
     "slug": "gematec",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": false,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true
-    },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ],
-      "package": "com.cisuno7.gematec",
-      "versionCode": 1,
-      "compileSdkVersion": 35,
-      "targetSdkVersion": 34,
-      "minSdkVersion": 24
+      "package": "com.cisuno7.gematec"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "extra": {
+      "outputDir": "C:\\temp\\export-output",
+      "eas": {
+        "projectId": "e611f8de-2c9d-42d1-a359-837c4b9dda91"
+      }
     },
     "plugins": [
       [
         "expo-build-properties",
         {
           "android": {
-            "usesCleartextTraffic": true,
             "compileSdkVersion": 35,
             "targetSdkVersion": 34,
             "buildToolsVersion": "35.0.0",
-            "minSdkVersion": 24
+            "kotlinVersion": "1.9.25"
           }
         }
-      ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "e611f8de-2c9d-42d1-a359-837c4b9dda91"
-      }
-    }
+      ],
+      "expo-router"
+    ]
   }
 }

@@ -6,7 +6,7 @@ import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../Routers/AppRouter';
 import { usePermissions } from "../Context/PermissionsContext";
 import { DrawerNavigationProp } from '@react-navigation/drawer';
-import { TextInputMask } from "react-native-masked-text";
+
 import { API_BASE_URL } from '../config/apiConfig';
 interface PersonalDataScreenProps {
   route: RouteProp<RootStackParamList, 'PersonalDataScreen'>;
@@ -157,13 +157,19 @@ const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route }) => {
 
       {/* Data de Nascimento - Editável */}
       <Text style={styles.label}>Data de Nascimento</Text>
-      <TextInputMask
+
+      <TextInput
         style={styles.input}
-        type={"datetime"}
-        options={{ format: "YYYY-MM-DD" }}
         value={birthdate}
-        onChangeText={setBirthdate}
+        onChangeText={(text: string) => {
+          let cleaned = text.replace(/[^0-9-]/g, '').slice(0, 10);
+          if (cleaned.length === 4 || cleaned.length === 7) {
+            if (birthdate.length < cleaned.length) cleaned += '-';
+          }
+          setBirthdate(cleaned);
+        }}
         placeholder="Data de Nascimento (AAAA-MM-DD)"
+        keyboardType="numeric"
       />
 
       <Button title="Salvar Alterações" onPress={handleUpdate} />
