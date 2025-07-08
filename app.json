@@ -3,14 +3,35 @@
     "name": "gematec",
     "slug": "gematec",
     "version": "1.0.0",
-    "android": {
-      "package": "com.cisuno7.gematec"
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
     },
-    "extra": {
-      "outputDir": "C:\\temp\\export-output",
-      "eas": {
-        "projectId": "e611f8de-2c9d-42d1-a359-837c4b9dda91"
-      }
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.cisuno7.gematec",
+      "versionCode": 1,
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 34,
+      "minSdkVersion": 24
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       [
@@ -23,8 +44,7 @@
             "kotlinVersion": "1.9.25"
           }
         }
-      ],
-      "expo-router"
+      ]
     ],
     "owner": "cisuno7"
   }

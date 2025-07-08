@@ -43,6 +43,10 @@ Saved Games/
 !src/
 !tsconfig.json
 !eas.json
+<<<<<<< HEAD
 android/.gradle/
 android/app/build/
 android/build/
+=======
+.env
+>>>>>>> 3a0e9d585a2081520fcb65e28aa6e464a4c1eca2
