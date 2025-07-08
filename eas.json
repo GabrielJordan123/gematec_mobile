@@ -6,20 +6,24 @@
   "build": {
     "development": {
       "developmentClient": false,
+      "prebuildCommand": "npx expo prebuild --clean",
       "distribution": "internal",
       "android": {
         "gradleCommand": ":app:assembleDebug",
+        "image": "latest",
         "buildType": "apk"
       }
     },
     "preview": {
       "distribution": "internal",
+      "prebuildCommand": "npx expo prebuild --clean",
       "android": {
         "gradleCommand": ":app:assembleRelease",
         "buildType": "apk"
       }
     },
     "production": {
+      "prebuildCommand": "npx expo prebuild --clean",
       "autoIncrement": true,
       "android": {
         "gradleCommand": ":app:assembleRelease",
