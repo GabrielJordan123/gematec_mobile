@@ -1,7 +1,19 @@
-import { registerRootComponent } from 'expo';
-import RootLayout from './app/_layout';
+import React from "react";
+import { NavigationContainer } from '@react-navigation/native';
+import AppRouter from "./src/Routers/AppRouter";
+import { PermissionProvider } from "./src/Context/PermissionsContext";
+import { UserProvider } from "./src/Context/UserContext";
 
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in Expo Go or in a native build,
-// the environment is set up appropriately
-registerRootComponent(RootLayout);
+const App = () => {
+    return (
+        <PermissionProvider>
+            <UserProvider>
+                <NavigationContainer>
+                    <AppRouter />
+                </NavigationContainer>
+            </UserProvider>
+        </PermissionProvider>
+    );
+};
+
+export default App;
