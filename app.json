@@ -37,12 +37,16 @@
           "android": {
             "compileSdkVersion": 35,
             "targetSdkVersion": 34,
-            "buildToolsVersion": "35.0.0",
-            "kotlinVersion": "1.9.25"
+            "buildToolsVersion": "35.0.0"
           }
         }
       ]
     ],
-    "owner": "cisuno7"
+    "owner": "cisuno7",
+    "extra": {
+      "eas": {
+        "projectId": "e611f8de-2c9d-42d1-a359-837c4b9dda91"
+      }
+    }
   }
 }

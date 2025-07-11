@@ -42,7 +42,7 @@ const EquipamentScreen: React.FC<EquipamentScreenProps> = ({ route, navigation }
     );
   }
 
-  if (!hasPermission("equipments.list_equipments")) {
+  if (!hasPermission("list_equipments")) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Você não tem permissão para visualizar equipamentos.</Text>
@@ -109,7 +109,7 @@ const EquipamentScreen: React.FC<EquipamentScreenProps> = ({ route, navigation }
       <Text style={styles.itemText}>Patrimônio: {item.patrimony}</Text>
       <Text style={styles.itemText}>Tipo de Equipamento: {item.equipment_type?.name || "N/A"}</Text>
       <Text style={styles.itemText}>Fabricante: {item.brand?.name || "N/A"}</Text>
-      <Text style={styles.itemText}>Tecnologia: {item.technology || "N/A"}</Text>
+      <Text style={styles.itemText}>Tecnologia: {item.technology?.name || "N/A"}</Text>
       <Text style={styles.itemText}>Setor ID: {item.sector_id || "N/A"}</Text>
       <Text style={styles.itemText}>Cliente ID: {item.client_id || "N/A"}</Text>
       <TouchableOpacity

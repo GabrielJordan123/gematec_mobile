@@ -102,7 +102,7 @@ const CreateEquipmentScreen: React.FC<CreateEquipmentScreenProps> = ({ route, na
     );
   }
 
-  if (!hasPermission("equipments.add_equipment")) {
+  if (!hasPermission("add_equipments")) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Você não tem permissão para criar equipamentos.</Text>
