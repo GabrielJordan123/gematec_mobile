@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -25,7 +24,7 @@
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.cisuno7.gematec",
-      "versionCode": 1
+      "versionCode": 27
     },
     "web": {
       "favicon": "./assets/favicon.png"

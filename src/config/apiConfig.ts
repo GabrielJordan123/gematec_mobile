@@ -2,8 +2,8 @@
 
 // URLs base para os ambientes
 const API_BASE_URLS = {
-    production: "http://164.92.115.154/api",
-    homologation: "http://164.92.115.154/api",
+    production: "https://keosstg001.xyz/api",
+    homologation: "https://keosstg001.xyz/api",
 };
 
 // Escolha do ambiente (pode ser configurado por variável de ambiente ou constante)
