@@ -28,7 +28,7 @@ const ManualDetailsScreen: React.FC<ManualDetailsScreenProps> = ({ route, naviga
         );
     }
 
-    if (!hasPermission("manuals.view_manual")) {
+    if (!hasPermission("view_manual")) {
         return (
             <View style={styles.container}>
                 <Text style={styles.errorText}>Você não tem permissão para visualizar manuais.</Text>

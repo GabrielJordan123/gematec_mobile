@@ -39,19 +39,19 @@ export default class ManualService {
     }
     static async fetchManualDetails(token: string, manualId: number): Promise<Manual> {
         try {
-          const url = `${API_BASE_URL}/manuals/${manualId}`;
-          const response = await apiClient.get(url, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          return response.data;
+            const url = `${API_BASE_URL}/manuals/${manualId}`;
+            const response = await apiClient.get(url, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return response.data;
         } catch (error: any) {
-          console.error("[ManualService] Erro ao buscar detalhes do manual:", error);
-          throw new Error("Erro ao buscar detalhes do manual.");
+            console.error("[ManualService] Erro ao buscar detalhes do manual:", error);
+            throw new Error("Erro ao buscar detalhes do manual.");
         }
-      }
+    }
     static async fetchCategories(token: string): Promise<Category[]> {
         try {
-            const url = `${API_BASE_URL}/api/categories`;
+            const url = `${API_BASE_URL}/manuals`;
             const response = await apiClient.get(url, {
                 headers: { Authorization: `Bearer ${token}` },
             });

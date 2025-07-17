@@ -20,13 +20,7 @@ const ViewResponseActivityScreen = ({ route, navigation }: ViewResponseActivityS
     const { hasPermission, permissions } = usePermissions();
     const [isSavingDisabled, setIsSavingDisabled] = useState(false);
 
-    if (permissions.length === 0 && loading) {
-        return <View style={styles.container}><Text style={styles.emptyText}>Carregando permissões...</Text></View>;
-    }
 
-    if (!hasPermission("service_orders.view_serviceorderanswer")) {
-        return <View style={styles.container}><Text style={styles.errorText}>Você não tem permissão para visualizar respostas de ordens de serviço.</Text></View>;
-    }
 
     useEffect(() => {
         setIsSavingDisabled(equipmentStatus === "open");

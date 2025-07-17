@@ -34,7 +34,7 @@ const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
     );
   }
 
-  if (!hasPermission("manuals.view_manual")) {
+  if (!hasPermission("list_manuals")) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Você não tem permissão para visualizar manuais.</Text>

@@ -43,22 +43,7 @@ const TechnicalAssistanceScreen: React.FC<TechnicalAssistanceScreenProps> = ({ r
         status: 'open'
     });
 
-    // Verificação de permissões
-    if (permissions.length === 0 && loading) {
-        return (
-            <View style={styles.center}>
-                <Text style={styles.emptyText}>Carregando permissões...</Text>
-            </View>
-        );
-    }
 
-    if (!hasPermission("technical_assistances.view_technicalassistance")) {
-        return (
-            <View style={styles.center}>
-                <Text style={styles.errorText}>Você não tem permissão para visualizar assistências técnicas.</Text>
-            </View>
-        );
-    }
 
     useEffect(() => {
         const fetchData = async () => {

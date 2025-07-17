@@ -76,7 +76,7 @@ const CustomDrawerContent = (props: any & { extraData: {} }) => {
       <DrawerItemList {...props} />
 
       {/* Submenu Clientes */}
-      {hasPermission("clients.list_clients") && (
+      {hasPermission("list_clients") && (
         <View>
           <View style={styles.menuItem}>
             <TouchableOpacity
@@ -117,7 +117,7 @@ const CustomDrawerContent = (props: any & { extraData: {} }) => {
       )}
 
       {/* Submenu Equipamentos */}
-      {hasPermission("equipments.list_equipments") && (
+      {hasPermission("list_equipments") && (
         <View>
           <View style={styles.menuItem}>
             <TouchableOpacity
@@ -142,7 +142,7 @@ const CustomDrawerContent = (props: any & { extraData: {} }) => {
               >
                 <Text style={styles.submenuText}>Leitura QR Code</Text>
               </TouchableOpacity>
-              {hasPermission("equipments.add_equipment") && (
+              {hasPermission("add_equipment") && (
                 <TouchableOpacity
                   style={styles.submenuItem}
                   onPress={() =>
@@ -187,7 +187,7 @@ const CustomDrawerContent = (props: any & { extraData: {} }) => {
       )}
 
       {/* Submenu Atividades */}
-      {(hasPermission("pmocs.view_pmoc") || hasPermission("technical_assistances.view_technicalassistance") || hasPermission("service_orders.view_serviceorder")) && (
+      {hasPermission("list_activities") && (
         <View>
           <View style={styles.menuItem}>
             <TouchableOpacity
@@ -202,7 +202,7 @@ const CustomDrawerContent = (props: any & { extraData: {} }) => {
           </View>
           {isActivitySubmenuOpen && (
             <View style={styles.submenu}>
-              {hasPermission("pmocs.view_pmoc") && (
+              {hasPermission("list_activities") && (
                 <TouchableOpacity
                   style={styles.submenuItem}
                   onPress={() =>
@@ -214,7 +214,7 @@ const CustomDrawerContent = (props: any & { extraData: {} }) => {
                   <Text style={styles.submenuText}>PMOCs</Text>
                 </TouchableOpacity>
               )}
-              {hasPermission("service_orders.view_serviceorder") && (
+              {hasPermission("list_activities") && (
                 <TouchableOpacity
                   style={styles.submenuItem}
                   onPress={() =>
@@ -226,7 +226,7 @@ const CustomDrawerContent = (props: any & { extraData: {} }) => {
                   <Text style={styles.submenuText}>Listagem Ordens de Serviço</Text>
                 </TouchableOpacity>
               )}
-              {hasPermission("technical_assistances.view_technicalassistance") && (
+              {hasPermission("list_activities") && (
                 <TouchableOpacity
                   style={styles.submenuItem}
                   onPress={() =>
@@ -238,7 +238,7 @@ const CustomDrawerContent = (props: any & { extraData: {} }) => {
                   <Text style={styles.submenuText}>Assistência Técnica</Text>
                 </TouchableOpacity>
               )}
-              {(hasPermission("pmocs.view_pmoc") || hasPermission("technical_assistances.view_technicalassistance") || hasPermission("service_orders.view_serviceorder")) && (
+              {(hasPermission("list_activities") || hasPermission("list_activities") || hasPermission("list_activities")) && (
                 <TouchableOpacity
                   style={styles.submenuItem}
                   onPress={() =>

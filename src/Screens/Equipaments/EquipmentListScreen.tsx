@@ -29,21 +29,7 @@ const EquipmentListScreen: React.FC<EquipmentListScreenProps> = ({
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(false);
   const { hasPermission, permissions } = usePermissions();
-  if (permissions.length === 0 && loading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.emptyText}>Carregando permissões...</Text>
-      </View>
-    );
-  }
 
-  if (!hasPermission("equipments.view_equipment")) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Você não tem permissão para visualizar equipamentos.</Text>
-      </View>
-    );
-  }
   const fetchEquipments = async () => {
     try {
       setLoading(true);

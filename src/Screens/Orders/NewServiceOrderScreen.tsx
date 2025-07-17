@@ -20,13 +20,7 @@ const NewServiceOrderScreen: React.FC<NewServiceOrderScreenProps> = ({ route, na
     const [loading, setLoading] = React.useState(false);
     const { equipmentId } = route.params;
     const { hasPermission, permissions } = usePermissions();
-    if (!hasPermission("service_orders.add_serviceorder")) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.errorText}>Você não tem permissão para criar ordens de serviço.</Text>
-            </View>
-        );
-    }
+
     const createServiceOrder = async () => {
         setLoading(true);
         try {

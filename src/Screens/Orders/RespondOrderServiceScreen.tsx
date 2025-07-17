@@ -23,14 +23,6 @@ const RespondOrderScreen: React.FC<RespondOrderScreenProps> = ({ route, navigati
     const [images, setImages] = useState<UploadedImage[]>([]);
     const { serviceOrderId } = route.params;
 
-    if (permissions.length === 0 && loading) {
-        return <View style={styles.container}><Text style={styles.emptyText}>Carregando permissões...</Text></View>;
-    }
-
-    if (!hasPermission("service_orders.add_serviceorderanswer")) {
-        return <View style={styles.container}><Text style={styles.errorText}>Você não tem permissão para responder ordens de serviço.</Text></View>;
-    }
-
     useEffect(() => {
         const fetchData = async () => {
             try {

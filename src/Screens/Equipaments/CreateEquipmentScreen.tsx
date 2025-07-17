@@ -93,22 +93,7 @@ const CreateEquipmentScreen: React.FC<CreateEquipmentScreenProps> = ({ route, na
 
   const { hasPermission, permissions } = usePermissions();
 
-  // Verificações iniciais
-  if (permissions.length === 0 && loading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.emptyText}>Carregando permissões...</Text>
-      </View>
-    );
-  }
 
-  if (!hasPermission("add_equipments")) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Você não tem permissão para criar equipamentos.</Text>
-      </View>
-    );
-  }
   const fetchCapacityUnits = async (query: string) => {
     if (query.length < 3) {
       setCapacityUnits([]);

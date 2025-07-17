@@ -26,7 +26,7 @@ export const ClientsAvulsosScreen: React.FC<ClientScreenProps> = ({ route, navig
     );
   }
 
-  if (!hasPermission("clients.list_clients")) {
+  if (!hasPermission("list_clients")) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Você não tem permissão para visualizar clientes avulsos.</Text>
@@ -51,7 +51,7 @@ export const ClientsComContratoScreen: React.FC<ClientScreenProps> = ({ route, n
     );
   }
 
-  if (!hasPermission("clients.view_client")) {
+  if (!hasPermission("list_clients")) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Você não tem permissão para visualizar clientes avulsos.</Text>

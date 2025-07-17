@@ -40,7 +40,7 @@ const ListOrderServiceScreen: React.FC<ListOrderServiceScreenProps> = ({ route, 
         return <View style={styles.container}><Text style={styles.emptyText}>Carregando permissões...</Text></View>;
     }
 
-    if (!hasPermission("service_orders.view_serviceorder")) {
+    if (!hasPermission("list_activities")) {
         return <View style={styles.container}><Text style={styles.errorText}>Você não tem permissão para visualizar ordens de serviço.</Text></View>;
     }
 

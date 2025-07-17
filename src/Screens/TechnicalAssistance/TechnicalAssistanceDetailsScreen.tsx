@@ -35,13 +35,6 @@ const TechnicalAssistanceDetailsScreen: React.FC<TechnicalAssistanceDetailsScree
     const [answers, setAnswers] = useState<{ [key: number]: { value: string; justification?: string } }>({});
     const service = new TechnicalAssistanceService();
 
-    if (permissions.length === 0 && loading) {
-        return <View style={styles.center}><Text style={styles.emptyText}>Carregando permissões...</Text></View>;
-    }
-
-    if (!hasPermission("technical_assistances.view_technicalassistance")) {
-        return <View style={styles.center}><Text style={styles.errorText}>Você não tem permissão para visualizar assistências técnicas.</Text></View>;
-    }
 
     useEffect(() => {
         const fetchTechnicalAssistance = async () => {
@@ -180,7 +173,9 @@ const TechnicalAssistanceDetailsScreen: React.FC<TechnicalAssistanceDetailsScree
                 <Text style={styles.headerText}>Patrimônio: {data.equipment.patrimony}</Text>
                 <Text style={styles.headerText}>Número de Série: {data.equipment.serial_number || "N/A"}</Text>
                 <Text style={styles.headerText}>Fabricante: {data.equipment.brand?.name || "N/A"}</Text>
-                <Text style={styles.headerText}>Tecnologia: {data.equipment.technology || "N/A"}</Text>
+                <Text style={styles.headerText}>
+                    Tecnologia: {data.equipment.technology ? data.equipment.technology.name : "N/A"}
+                </Text>
                 <Text style={styles.headerText}>Tipo de Equipamento: {data.equipment.equipment_type?.name || "N/A"}</Text>
                 <Text style={styles.headerText}>Tipo de Evaporadora: {data.equipment.evaporator_type?.name || "N/A"}</Text>
                 <Text style={styles.headerText}>Tipo de Serpentina: {data.equipment.coil_type?.name || "N/A"}</Text>

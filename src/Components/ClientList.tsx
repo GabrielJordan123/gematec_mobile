@@ -29,7 +29,7 @@ const ClientList: React.FC<ClientListProps> = ({ hasContract, navigation }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  if (!hasPermission("clients.view_client")) {
+  if (!hasPermission("list_clients")) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Você não tem permissão para visualizar clientes.</Text>

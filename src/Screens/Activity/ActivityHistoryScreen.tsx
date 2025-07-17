@@ -34,9 +34,9 @@ const ActivityHistoryScreen: React.FC<ActivityHistoryScreenProps> = ({ route, na
     const activityService = new ActivityService();
 
     // Permissões
-    const canViewPmoc = hasPermission("pmocs.view_pmoc");
-    const canViewServiceOrder = hasPermission("service_orders.view_serviceorder");
-    const canViewTechnicalAssistance = hasPermission("technical_assistances.view_technicalassistance");
+    const canViewPmoc = hasPermission("list_activites");
+    const canViewServiceOrder = hasPermission("list_activities");
+    const canViewTechnicalAssistance = hasPermission("list_activities");
 
     if (!canViewPmoc && !canViewServiceOrder && !canViewTechnicalAssistance) {
         return (

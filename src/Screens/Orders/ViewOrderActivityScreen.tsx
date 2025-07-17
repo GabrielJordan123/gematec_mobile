@@ -45,13 +45,7 @@ const ViewOrderActivityScreen: React.FC<ViewOrderActivityScreenProps> = ({
         );
     }
 
-    if (!hasPermission("service_orders.view_serviceorder")) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.errorText}>Você não tem permissão para visualizar ordens de serviço.</Text>
-            </View>
-        );
-    }
+
     const fetchServiceOrderDetails = async () => {
         try {
             setLoading(true);

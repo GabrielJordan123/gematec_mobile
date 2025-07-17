@@ -27,7 +27,7 @@ const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route }) => {
     );
   }
 
-  if (!hasPermission("users.view_user")) {
+  if (!hasPermission("view_user")) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Você não tem permissão para visualizar seus dados.</Text>

@@ -61,13 +61,7 @@ const ClientDetailsScreen: React.FC<ClientDetailsScreenProps> = ({ route, naviga
     return <ActivityIndicator size="large" color="#007BFF" />;
   }
 
-  if (!hasPermission("clients.view_client")) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Você não tem permissão para visualizar detalhes do cliente.</Text>
-      </View>
-    );
-  }
+
 
   if (loading) {
     return <ActivityIndicator size="large" color="#007BFF" />;
