@@ -24,7 +24,7 @@ const AccountSelectionScreen: React.FC<AccountSelectionScreenProps> = ({ navigat
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [selectedAccount, setSelectedAccount] = useState("");
     const [loading, setLoading] = useState(true);
-    const { setAccountId } = useUser();
+    const { setAccountId, setUsername } = useUser();
     const { setPermissions } = usePermissions();
 
     useEffect(() => {
@@ -69,15 +69,16 @@ const AccountSelectionScreen: React.FC<AccountSelectionScreenProps> = ({ navigat
             const response = await AuthService.switchAccount(slidingToken, parseInt(selectedAccount));
             await AsyncStorage.setItem("access_token", response.access);
             await AsyncStorage.setItem("refresh_token", response.refresh);
-
+            console.log("Access Token para inspeção:", response.access);
             // Decodificar o access token para obter permissões
             const decodedToken = decodeToken(response.access);
             const permissions = decodedToken.permissions || [];
+            const usernameFromToken = decodedToken.user_name || "Usuário";
             await AsyncStorage.setItem("permissions", JSON.stringify(permissions));
             setPermissions(permissions);
-
+            setUsername(usernameFromToken);
             // Armazenar o accountId no contexto
-            setAccountId(parseInt(selectedAccount)); 
+            setAccountId(parseInt(selectedAccount));
 
             // Redirecionar para a tela inicial
             navigation.navigate("HomeScreen");

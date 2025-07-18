@@ -44,6 +44,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     loadPersistedData();
   }, []);
+  // Função para salvar o username no AsyncStorage
+  const saveUsername = async (name: string) => {
+    await AsyncStorage.setItem("username", name);
+    setUsername(name);
+  };
+
   const saveAccountId = async (id: number | null) => {
     if (id) {
       await AsyncStorage.setItem("selectedAccountId", id.toString());
@@ -56,7 +62,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <UserContext.Provider
       value={{
         username,
-        setUsername,
+        setUsername: saveUsername,
         clientId,
         setClientId,
         sectorId,

@@ -30,6 +30,17 @@ import TechnicalAssistanceDetailsScreen from "../Screens/TechnicalAssistance/Tec
 import ManualDetailsScreen from "../Screens/ManualDetailsScreen";
 import ManualsScreen from "../Screens/ManualsScreen";
 export type RootStackParamList = {
+  CondenserTypesScreen: undefined;
+  EvaporatorTypesScreen: undefined;
+  PhasesScreen: undefined;
+  TechnologiesScreen: undefined;
+  FunctionsScreen: undefined;
+  ManufacturersScreen: undefined;
+  CoilTypesScreen: undefined;
+  EquipmentTypesScreen: undefined;
+  CompressorTypesScreen: undefined;
+  CoolingFluidTypesScreen: undefined;
+  CapacityUnitsScreen: undefined;
   QRCodeScreen: undefined;
   LoginScreen: undefined;
   PersonalDataScreen: undefined;
