@@ -46,6 +46,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ route, navigation }) => {
       // Salvar os tokens no AsyncStorage
       await AsyncStorage.setItem('sliding_token', response.sliding_token);
       console.log('Token salvo - sliding_token:', response.sliding_token);
+      await AsyncStorage.setItem('keep_logged_in', JSON.stringify(isChecked));
 
       // Redirecionar para a tela de seleção de conta
       navigation.navigate("AccountSelectionScreen");
@@ -58,7 +59,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ route, navigation }) => {
       });
       Alert.alert(
         "Erro de Login",
-        `Ocorreu um erro: ${error.message}\nStatus: ${error.response?.status || "N/A"}\nResponse: ${JSON.stringify(error.response?.data || "N/A")}\nURL: ${API_BASE_URL}/token`,
+        error.message,
         [{ text: "OK" }]
       );
     }
@@ -78,6 +79,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ route, navigation }) => {
           style={styles.input}
           placeholder="Email"
           keyboardType="email-address"
+          placeholderTextColor="#999" // <--- Adicionado
           value={email}
           onChangeText={setEmail}
         />
@@ -87,6 +89,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ route, navigation }) => {
             style={styles.passwordInput}
             placeholder="Senha"
             secureTextEntry={!isPasswordVisible}
+            placeholderTextColor="#999"
             value={password}
             onChangeText={setPassword}
           />
@@ -116,7 +119,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ route, navigation }) => {
           <Text style={styles.loginButtonText}>Entrar</Text>
         </TouchableOpacity>
 
-        <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
+
       </View>
     </LinearGradient>
   );
@@ -167,6 +170,7 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     padding: 15,
+    color: '#000'
   },
   eyeIcon: {
     padding: 10,
@@ -197,11 +201,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  forgotPasswordText: {
-    fontSize: 14,
-    color: "#007BFF",
-    textDecorationLine: "underline",
-  },
+
 });
 
 export default LoginScreen;

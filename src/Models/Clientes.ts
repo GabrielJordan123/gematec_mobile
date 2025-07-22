@@ -2,6 +2,11 @@
 export interface Sector {
   id: number;
   name: string;
+  equipment_count?: number; // Contagem de equipamentos no setor
+  subsector_count?: number; // Contagem de subsetores
+  level: number;
+  subsectors?: Sector[];
+  complete_name: string; // Adicionado
 }
 
 export interface Address {

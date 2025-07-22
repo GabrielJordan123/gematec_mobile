@@ -70,6 +70,16 @@ const AccountSelectionScreen: React.FC<AccountSelectionScreenProps> = ({ navigat
             await AsyncStorage.setItem("access_token", response.access);
             await AsyncStorage.setItem("refresh_token", response.refresh);
             console.log("Access Token para inspeção:", response.access);
+            // Recuperar a preferência "Manter-me logado"
+            const keepLoggedInString = await AsyncStorage.getItem('keep_logged_in');
+            const keepLoggedIn = keepLoggedInString ? JSON.parse(keepLoggedInString) : false;
+            // Salvar o refresh_token apenas se "Manter-me logado" estiver marcado
+            if (keepLoggedIn) {
+                await AsyncStorage.setItem("refresh_token", response.refresh);
+            } else {
+                // Se não for para manter logado, garantir que o refresh_token não persista
+                await AsyncStorage.removeItem("refresh_token");
+            }
             // Decodificar o access token para obter permissões
             const decodedToken = decodeToken(response.access);
             const permissions = decodedToken.permissions || [];
@@ -139,6 +149,7 @@ const styles = StyleSheet.create({
         borderColor: "#ccc",
         borderRadius: 5,
         marginBottom: 20,
+        backgroundColor: '#FFFFFF',
     },
     button: {
         backgroundColor: "#007BFF",

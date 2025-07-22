@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Button,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import EquipmentService from "../../Services/EquipamentService";
@@ -16,6 +17,8 @@ import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { RootStackParamList } from "../../Routers/AppRouter";
 import { Equipment } from "../../Models/Equipament";
 import { usePermissions } from "../../Context/PermissionsContext";
+import ClientService from "../../Services/ClientService";
+
 interface EquipmentListScreenProps {
   route: RouteProp<RootStackParamList, "EquipmentListScreen">;
   navigation: DrawerNavigationProp<RootStackParamList, "EquipmentListScreen">;
@@ -25,10 +28,43 @@ const EquipmentListScreen: React.FC<EquipmentListScreenProps> = ({
   route,
   navigation,
 }) => {
+  const { clientId, sectorId } = route.params;
 
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(false);
   const { hasPermission, permissions } = usePermissions();
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [clientName, setClientName] = useState("");
+  const [sectorName, setSectorName] = useState("");
+
+  if (!hasPermission("list_equipments")) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Você não tem permissão para visualizar equipamentos.</Text>
+      </View>
+    );
+  }
+
+  const fetchClientAndSectorNames = async () => {
+    try {
+      const token = await AsyncStorage.getItem("access_token");
+      if (!token) return;
+
+      if (clientId) {
+        const clientDetails = await ClientService.getClientDetails(clientId, token);
+        setClientName(clientDetails.name || "N/A");
+      }
+
+      if (clientId && sectorId) {
+        const sectorsResponse = await ClientService.getClientSectors(clientId.toString(), token);
+        const sector = sectorsResponse.results?.find((s: any) => s.id === sectorId);
+        setSectorName(sector?.name || "N/A");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar nomes de cliente/setor:", error);
+    }
+  };
 
   const fetchEquipments = async () => {
     try {
@@ -36,14 +72,32 @@ const EquipmentListScreen: React.FC<EquipmentListScreenProps> = ({
       const token = await AsyncStorage.getItem("access_token");
       if (!token) throw new Error("Token de acesso não encontrado.");
 
-      const response = await EquipmentService.fetchEquipments(token, {});
+      const filters: { client_id?: number; sector_id?: number; page: number; per_page: number } = {
+        page: page,
+        per_page: 10,
+      };
+
+      if (clientId) {
+        filters.client_id = clientId;
+      }
+      if (sectorId) {
+        filters.sector_id = sectorId;
+      }
+
+      const response = await EquipmentService.fetchEquipments(token, filters);
       setEquipmentList(response.results || []);
+      setTotalPages(Math.ceil(response.count / 10) || 1);
     } catch (error: any) {
       Alert.alert("Erro", error.message || "Falha ao carregar os equipamentos.");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchClientAndSectorNames();
+    fetchEquipments();
+  }, [clientId, sectorId, page]);
 
   const handleRemoveEquipment = async (equipmentId: number) => {
     try {
@@ -58,10 +112,6 @@ const EquipmentListScreen: React.FC<EquipmentListScreenProps> = ({
     }
   };
 
-  useEffect(() => {
-    fetchEquipments();
-  }, []);
-
   const renderEquipmentItem = ({ item }: { item: any }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemText}>ID: {item.id}</Text>
@@ -69,10 +119,9 @@ const EquipmentListScreen: React.FC<EquipmentListScreenProps> = ({
 
       <TouchableOpacity
         style={styles.editButton}
-        // Ajuste no renderEquipmentItem
         onPress={() =>
           navigation.navigate("EditEquipmentScreen", {
-            equipmentId: String(item.id), // Convertido para string
+            equipmentId: String(item.id),
           })
         }
       >
@@ -104,6 +153,11 @@ const EquipmentListScreen: React.FC<EquipmentListScreenProps> = ({
 
   return (
     <View style={styles.container}>
+      {clientId && sectorId && (
+        <Text style={styles.headerText}>
+          Equipamentos para: {clientName} {'>'} {sectorName}
+        </Text>
+      )}
       <View style={styles.opContainer}>
         <TouchableOpacity
           style={styles.qrButton}
@@ -115,11 +169,27 @@ const EquipmentListScreen: React.FC<EquipmentListScreenProps> = ({
       {loading ? (
         <ActivityIndicator size="large" color="#007BFF" />
       ) : (
-        <FlatList
-          data={equipmentList}
-          keyExtractor={(item) => `${item.id}`}
-          renderItem={renderEquipmentItem}
-        />
+        <>
+          <FlatList
+            data={equipmentList}
+            keyExtractor={(item) => `${item.id}`}
+            renderItem={renderEquipmentItem}
+            ListEmptyComponent={<Text style={styles.emptyText}>Nenhum equipamento encontrado.</Text>}
+          />
+          <View style={styles.pagination}>
+            <Button
+              title="Anterior"
+              onPress={() => setPage((p) => Math.max(p - 1, 1))}
+              disabled={page === 1}
+            />
+            <Text style={styles.pageText}>Página {page} de {totalPages}</Text>
+            <Button
+              title="Próximo"
+              onPress={() => setPage((p) => (p < totalPages ? p + 1 : p))}
+              disabled={page === totalPages}
+            />
+          </View>
+        </>
       )}
     </View>
   );
@@ -130,6 +200,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#f5f5f5",
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
   },
   emptyText: {
     fontSize: 14,
@@ -184,6 +260,16 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 14,
     color: "red",
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  pageText: {
+    fontSize: 14,
+    color: "#333",
   },
 });
 

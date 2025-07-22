@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  FlatList
 } from "react-native";
 import { RouteProp, NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../Routers/AppRouter";
@@ -23,13 +24,14 @@ interface ClientDetailsScreenProps {
 
 const ClientDetailsScreen: React.FC<ClientDetailsScreenProps> = ({ route, navigation }) => {
   const { clientId } = route.params;
-  const { hasPermission } = usePermissions(); // Hook movido para o topo
-  const [clientData, setClientData] = useState<any>(null); // Hook movido para o topo
-  const [contacts, setContacts] = useState<any[]>([]); // Hook movido para o topo
-  const [contracts, setContracts] = useState<any[]>([]); // Hook movido para o topo
-  const [addresses, setAddresses] = useState<Address[]>([]); // Hook movido para o topo
-  const [sectors, setSectors] = useState<Sector[]>([]); // Hook movido para o topo
-  const [loading, setLoading] = useState(false); // Hook movido para o topo
+  const { hasPermission } = usePermissions();
+  const [clientData, setClientData] = useState<any>(null);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [contracts, setContracts] = useState<any[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [topLevelSectors, setTopLevelSectors] = useState<Sector[]>([]);
+  const [allSectors, setAllSectors] = useState<Sector[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchClientDetails = async () => {
@@ -39,14 +41,24 @@ const ClientDetailsScreen: React.FC<ClientDetailsScreenProps> = ({ route, naviga
         if (!accessToken) throw new Error("Token de acesso não encontrado.");
 
         const clientDetails = await ClientService.getClientDetails(clientId, accessToken);
-
         setClientData(clientDetails);
+
         setContacts(await ClientService.getClientContacts(clientId.toString(), accessToken) || []);
         setContracts(await ClientService.getClientContracts(clientId.toString(), accessToken) || []);
         setAddresses(clientDetails.addresses || []);
-        setSectors(clientDetails.sectors || []);
+
+        const sectorsResponse = await ClientService.getClientSectors(clientId.toString(), accessToken);
+        const fetchedSectors: Sector[] = sectorsResponse.results || [];
+        console.log("[ClientDetailsScreen] Setores brutos da API:", fetchedSectors); // NOVO LOG
+        setAllSectors(fetchedSectors);
+
+        const initialSectors = fetchedSectors.filter(sector => sector.level === 0);
+        console.log("[ClientDetailsScreen] Setores de nível 0 filtrados:", initialSectors); // NOVO LOG
+        setTopLevelSectors(initialSectors);
+
       } catch (error: any) {
-        console.error("Erro ao buscar detalhes do cliente:", error);
+        console.error("[ClientDetailsScreen] Erro ao buscar detalhes do cliente:", error);
+        console.error("[ClientDetailsScreen] Detalhes do erro:", error.message, error.response?.data); // NOVO LOG
         Alert.alert("Erro", "Não foi possível carregar os detalhes do cliente.");
       } finally {
         setLoading(false);
@@ -56,12 +68,40 @@ const ClientDetailsScreen: React.FC<ClientDetailsScreenProps> = ({ route, naviga
     fetchClientDetails();
   }, [clientId]);
 
-  // Condicionais de renderização após todos os hooks
+  const hasChildren = (sector: Sector, allAvailableSectors: Sector[]): boolean => {
+    return allAvailableSectors.some(
+      (s) =>
+        s.level === sector.level + 1 &&
+        s.complete_name.startsWith(sector.complete_name + ' > ')
+    );
+  };
+
+  const renderSectorItem = ({ item }: { item: Sector }) => {
+    const hasMoreLevels = hasChildren(item, allSectors);
+
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => {
+          navigation.navigate("SubSectorScreen", {
+            clientId,
+            parentSector: item,
+          });
+        }}
+      >
+        <Text style={styles.text}>Nome do Setor: {item.name}</Text>
+        {hasMoreLevels ? (
+          <Text style={styles.linkText}>Ver Sub-setores</Text>
+        ) : (
+          <Text style={styles.linkText}>Ver Equipamentos</Text>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   if (loading && !clientData) {
     return <ActivityIndicator size="large" color="#007BFF" />;
   }
-
-
 
   if (loading) {
     return <ActivityIndicator size="large" color="#007BFF" />;
@@ -132,22 +172,12 @@ const ClientDetailsScreen: React.FC<ClientDetailsScreenProps> = ({ route, naviga
       )}
 
       <Text style={styles.sectionTitle}>Setores</Text>
-      {sectors.length > 0 ? (
-        sectors.map((sector, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.card}
-            onPress={() =>
-              navigation.navigate("EquipamentScreen", {
-                clientId,
-                sectorId: sector.id,
-              })
-            }
-          >
-            <Text style={styles.text}>Nome do Setor: {sector.name}</Text>
-            <Text style={styles.linkText}>Ver Equipamentos</Text>
-          </TouchableOpacity>
-        ))
+      {topLevelSectors.length > 0 ? (
+        <FlatList
+          data={topLevelSectors}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderSectorItem}
+        />
       ) : (
         <Text style={styles.emptyText}>Nenhum setor encontrado.</Text>
       )}
@@ -159,6 +189,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: "#f5f5f5",
   },
   backText: {
     marginLeft: 8,

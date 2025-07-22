@@ -29,6 +29,7 @@ import CreateServiceOrderScreen from "../Screens/Orders/CreateServiceOrderScreen
 import TechnicalAssistanceDetailsScreen from "../Screens/TechnicalAssistance/TechnicalAssistanceDetailsScreen";
 import ManualDetailsScreen from "../Screens/ManualDetailsScreen";
 import ManualsScreen from "../Screens/ManualsScreen";
+import SubSectorScreen from '../Screens/Clients/SubSectorScreen';
 export type RootStackParamList = {
   CondenserTypesScreen: undefined;
   EvaporatorTypesScreen: undefined;
@@ -50,13 +51,13 @@ export type RootStackParamList = {
   ClientDetailScreen: { clientId: number };
   AccountSelectionScreen: undefined;
   HomeScreen: undefined;
-  EquipamentScreen: { clientId: number; sectorId: number };
+  EquipamentScreen: { clientId: number; sectorId: number, subsectorId?: number };
   CreateServiceOrderScreen: { equipmentId: number; equipmentStatus: string };
   CreateEquipmentScreen: undefined;
   EquipmentDetailsScreen: { equipmentId: string };
   EquipmentQRCodeScreen: { equipmentId?: string };
   EditEquipmentScreen: { equipmentId: string };
-  EquipmentListScreen: undefined;
+  EquipmentListScreen: { clientId?: number; sectorId?: number };
   PmocListScreen: undefined;
   PmocDetailsScreen: { pmocId: number };
   PmocEquipmentScreen: { pmocId: number; equipmentId: number };
@@ -69,6 +70,7 @@ export type RootStackParamList = {
   HistOrderServiceEquipScreen: { equipmentId: number };
   TechnicalAssistanceDetails: { id: number };
   ManualDetailsScreen: { manualId: number };
+  SubSectorScreen: { clientId: number; parentSector: { id: number; name: string; level: number; complete_name: string } };
   ViewResponseActivityScreen: { serviceOrderId: number; equipmentStatus: string };
   RespondOrderScreen: { serviceOrderId: number; questions: string; equipmentId?: number };
 };
@@ -107,6 +109,7 @@ const AppRouter: React.FC = () => {
       <Stack.Screen name="ManualDetailsScreen" component={ManualDetailsScreen} options={{ headerTitle: '' }} />
       <Stack.Screen name="RespondOrderScreen" component={RespondOrderScreen} options={{ title: "Responder Plano de Atividade de uma Ordem de Serviço" }} />
       <Stack.Screen name="HomeScreen" component={DrawerNavigator} options={{ headerShown: false }} />
+      <Stack.Screen name="SubSectorScreen" component={SubSectorScreen} options={{ headerTitle: 'Sub-setores' }} />
     </Stack.Navigator>
   );
 };

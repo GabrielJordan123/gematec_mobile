@@ -104,6 +104,7 @@ const ClientList: React.FC<ClientListProps> = ({ hasContract, navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="Pesquisar cliente (min 3 caracteres)"
+        placeholderTextColor="#666"
         value={searchQuery}
         onChangeText={setSearchQuery}
         onSubmitEditing={handleSearch}

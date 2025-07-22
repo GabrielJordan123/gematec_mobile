@@ -120,6 +120,7 @@ const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route }) => {
         value={name}
         onChangeText={setName}
         placeholder="Nome"
+        editable={false}
       />
 
       {/* Email - Não editável */}
@@ -148,6 +149,7 @@ const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route }) => {
         style={styles.input}
         value={rhFactor}
         onChangeText={setRhFactor}
+        editable={false}
         placeholder="Fator RH"
       />
 

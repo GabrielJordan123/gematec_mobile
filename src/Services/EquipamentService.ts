@@ -2,13 +2,34 @@ import axios from 'axios';
 import { Equipment } from '../Models/Equipament';
 import apiClient from "../Context/ApiClient";
 import { API_BASE_URL } from "../config/apiConfig";
+
+interface EquipmentFilters {
+  search?: string;
+  equipmentType?: string;
+  brand?: string;
+  status?: string;
+  sector_id?: number;
+  client_id?: number;
+  subsector_id?: number; // Adicionado
+  page?: number;
+  per_page?: number;
+}
 export default class EquipmentService {
   static async fetchEquipments(
     token: string,
-    filters: any
+    filters: EquipmentFilters
   ): Promise<{ results: Equipment[]; count: number }> {
     try {
-      const params = new URLSearchParams(filters).toString();
+      const params = new URLSearchParams();
+      if (filters.search) params.append('search', filters.search);
+      if (filters.equipmentType) params.append('equipment_type', filters.equipmentType);
+      if (filters.brand) params.append('brand', filters.brand);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.sector_id) params.append('sector_id', filters.sector_id.toString());
+      if (filters.client_id) params.append('client_id', filters.client_id.toString());
+      if (filters.subsector_id) params.append('subsector_id', filters.subsector_id.toString());
+      if (filters.page) params.append('page', filters.page.toString());
+      if (filters.per_page) params.append('per_page', filters.per_page.toString());
       const url = `${API_BASE_URL}/equipments?${params}`;
       const response = await apiClient.get(url, {
         headers: { Authorization: `Bearer ${token}` },

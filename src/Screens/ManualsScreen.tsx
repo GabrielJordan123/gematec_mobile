@@ -111,6 +111,7 @@ const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="Pesquisar manual (min 3 caracteres)"
+        placeholderTextColor="#666" // <--- Adicionado
         value={search}
         onChangeText={setSearch}
         onSubmitEditing={handleSearch}

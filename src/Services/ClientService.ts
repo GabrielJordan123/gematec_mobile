@@ -117,7 +117,7 @@ export default class ClientService {
       const response = await apiClient.get(endpoint, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      console.log("[ClientService] Setores do cliente recebidos:", response.data);
+      console.log("[ClientService] Resposta completa dos setores:", response.data);
       return response.data;
     } catch (error: any) {
       console.error("[ClientService] Erro ao buscar setores do cliente:", error);

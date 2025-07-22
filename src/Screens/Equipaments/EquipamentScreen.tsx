@@ -1,12 +1,13 @@
+
 import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   FlatList,
   StyleSheet,
-  ActivityIndicator,
   TouchableOpacity,
   Button,
+  ActivityIndicator,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import EquipmentService from "../../Services/EquipamentService";
@@ -20,20 +21,24 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL } from "../../config/apiConfig";
 import axios from "axios";
 import { usePermissions } from "../../Context/PermissionsContext";
+import { Sector } from "../../Models/Clientes"; // Importe a interface Sector
+
 interface EquipamentScreenProps {
   route: RouteProp<RootStackParamList, "EquipamentScreen">;
   navigation: DrawerNavigationProp<RootStackParamList, "EquipamentScreen">;
 }
 
 const EquipamentScreen: React.FC<EquipamentScreenProps> = ({ route, navigation }) => {
-  const { clientId, sectorId } = route.params; // Recebe clientId e sectorId
+  const { clientId, sectorId, subsectorId } = route.params; // Recebe clientId, sectorId e subsectorId
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [clientName, setClientName] = useState("");
   const [sectorName, setSectorName] = useState("");
+  const [currentSectorSubsectors, setCurrentSectorSubsectors] = useState<Sector[]>([]); // <--- DECLARAÇÃO AQUI!
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const { hasPermission, permissions } = usePermissions();
+
   if (permissions.length === 0 && loading) {
     return (
       <View style={styles.container}>
@@ -49,6 +54,7 @@ const EquipamentScreen: React.FC<EquipamentScreenProps> = ({ route, navigation }
       </View>
     );
   }
+
   const fetchClientAndSector = async () => {
     try {
       if (!clientId || !sectorId) {
@@ -60,12 +66,14 @@ const EquipamentScreen: React.FC<EquipamentScreenProps> = ({ route, navigation }
       const clientRes = await apiClient.get(`${API_BASE_URL}/clients/${clientId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const sectorRes = await apiClient.get(`/clients/${clientId}/sectors/${sectorId}`, {
+      setClientName(clientRes.data.name || "N/A");
+
+      // Buscar detalhes do setor para obter os subsetores
+      const sectorRes = await apiClient.get(`${API_BASE_URL}/clients/${clientId}/sectors/${sectorId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      setClientName(clientRes.data.name || "N/A");
       setSectorName(sectorRes.data.name || "N/A");
+      setCurrentSectorSubsectors(sectorRes.data.subsectors || []); // Atualiza o estado com os subsetores
     } catch (error: any) {
       console.error("[EquipamentScreen] Erro ao buscar cliente/setor:", error.message || error);
     }
@@ -80,7 +88,8 @@ const EquipamentScreen: React.FC<EquipamentScreenProps> = ({ route, navigation }
       const updatedFilters = {
         ...filters,
         sector_id: sectorId,
-        client_id: clientId, // Adicionado para filtrar por cliente
+        client_id: clientId,
+        subsector_id: filters.subsector_id || subsectorId, // Inclui o subsectorId do filtro ou da rota
         page,
         per_page: 10,
       };
@@ -97,7 +106,18 @@ const EquipamentScreen: React.FC<EquipamentScreenProps> = ({ route, navigation }
 
   useEffect(() => {
     fetchClientAndSector();
-  }, []);
+  }, [clientId, sectorId]); // Adicionado clientId e sectorId como dependências
+
+  useEffect(() => {
+    // Chamar fetchEquipment com os filtros iniciais (incluindo subsectorId da rota)
+    fetchEquipment({
+      brand: "",
+      equipmentType: "",
+      search: "",
+      status: "",
+      subsector_id: subsectorId, // Garante que o filtro inicial inclua o subsectorId da rota
+    });
+  }, [page, subsectorId]); // Adicionado subsectorId como dependência
 
   const navigateToDetails = (equipmentId: number) => {
     navigation.navigate("EquipmentDetailsScreen", { equipmentId: String(equipmentId) });
@@ -114,7 +134,7 @@ const EquipamentScreen: React.FC<EquipamentScreenProps> = ({ route, navigation }
       <Text style={styles.itemText}>Cliente ID: {item.client_id || "N/A"}</Text>
       <TouchableOpacity
         style={styles.detailsButton}
-        onPress={() => navigateToDetails(item.id)} // Agora compatível com number
+        onPress={() => navigateToDetails(item.id)}
       >
         <FontAwesome name="eye" size={20} color="#007BFF" />
         <Text style={styles.detailsButtonText}>Ver Detalhes</Text>
@@ -139,9 +159,12 @@ const EquipamentScreen: React.FC<EquipamentScreenProps> = ({ route, navigation }
     <View style={styles.container}>
       <Text style={styles.header}>Cliente: {clientName} | Setor: {sectorName}</Text>
       <View style={styles.opContainer}>
-        <EquipmentFilters onFilter={fetchEquipment}
-
-          sectorId={sectorId} clientId={clientId} />
+        <EquipmentFilters
+          onFilter={fetchEquipment}
+          sectorId={sectorId}
+          clientId={clientId}
+          subsectors={currentSectorSubsectors} // Passa os subsetores para o filtro
+        />
         <TouchableOpacity
           style={styles.qrButton}
           onPress={() => navigation.navigate("EquipmentQRCodeScreen", {})}
