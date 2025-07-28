@@ -110,16 +110,18 @@ const AccountSelectionScreen: React.FC<AccountSelectionScreenProps> = ({ navigat
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Selecione uma Conta</Text>
-            <Picker
-                selectedValue={selectedAccount}
-                onValueChange={(value) => setSelectedAccount(value)}
-                style={styles.picker}
-            >
-                <Picker.Item label="Selecione uma conta" value="" />
-                {accounts.map((account) => (
-                    <Picker.Item key={account.id} label={account.name} value={account.id.toString()} />
-                ))}
-            </Picker>
+            <View style={styles.pickerContainer}>
+                <Picker
+                    selectedValue={selectedAccount}
+                    onValueChange={(value) => setSelectedAccount(value)}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Selecione uma conta" value="" />
+                    {accounts.map((account) => (
+                        <Picker.Item key={account.id} label={account.name} value={account.id.toString()} />
+                    ))}
+                </Picker>
+            </View>
             <TouchableOpacity
                 style={[styles.button, !selectedAccount && styles.disabledButton]}
                 onPress={handleSelectAccount}
@@ -144,12 +146,15 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: "center",
     },
-    picker: {
+    pickerContainer: {
         borderWidth: 1,
         borderColor: "#ccc",
         borderRadius: 5,
         marginBottom: 20,
         backgroundColor: '#FFFFFF',
+    },
+    picker: {
+        // Estilos diretos removidos para evitar conflitos no Android
     },
     button: {
         backgroundColor: "#007BFF",

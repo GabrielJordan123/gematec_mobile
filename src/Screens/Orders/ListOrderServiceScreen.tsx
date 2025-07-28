@@ -18,7 +18,7 @@ interface ListOrderServiceScreenProps {
 }
 
 const ListOrderServiceScreen: React.FC<ListOrderServiceScreenProps> = ({ route, navigation }) => {
-    const { equipmentId } = route.params;
+    const { equipmentId } = route.params || { equipmentId: null };
     const [orders, setOrders] = useState<ServiceOrder[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

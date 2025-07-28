@@ -25,7 +25,26 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ route, navigation }) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [isChecked, setChecked] = useState(false);
   const { setPermissions } = useContext(PermissionsContext);
-  const { setUsername } = useUser();
+  const { setUsername, login } = useUser();
+
+  useEffect(() => {
+    const loadKeepLoggedIn = async () => {
+      try {
+        const storedValue = await AsyncStorage.getItem('keep_logged_in');
+        if (storedValue !== null) {
+          const parsedValue = JSON.parse(storedValue);
+          setChecked(parsedValue);
+          console.log('Valor de keep_logged_in carregado:', parsedValue);
+        } else {
+          console.log('Nenhum valor de keep_logged_in encontrado no AsyncStorage.');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar keep_logged_in do AsyncStorage:', error);
+      }
+    };
+
+    loadKeepLoggedIn();
+  }, []); // Empty dependency array means this runs once on mount
 
 
   const handleLogin = async () => {
@@ -43,13 +62,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ route, navigation }) => {
         throw new Error('Resposta inválida da API: token não encontrado.');
       }
 
-      // Salvar os tokens no AsyncStorage
-      await AsyncStorage.setItem('sliding_token', response.sliding_token);
-      console.log('Token salvo - sliding_token:', response.sliding_token);
-      await AsyncStorage.setItem('keep_logged_in', JSON.stringify(isChecked));
+      // Usar a função login do UserContext para salvar o token e o estado de "manter logado"
+      await login(response.sliding_token, isChecked);
+      console.log('Login bem-sucedido. Token e preferência de "manter logado" salvos via UserContext.');
 
-      // Redirecionar para a tela de seleção de conta
-      navigation.navigate("AccountSelectionScreen");
+      // A navegação para a tela inicial (HomeScreen ou AccountSelectionScreen) será tratada automaticamente pelo AppRouter
+      // com base no estado de autenticação do UserContext.
     } catch (error: any) {
       console.error("Erro de login:", {
         message: error.message,
@@ -59,7 +77,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ route, navigation }) => {
       });
       Alert.alert(
         "Erro de Login",
-        error.message,
+        error.response?.data?.detail || error.message,
         [{ text: "OK" }]
       );
     }

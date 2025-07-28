@@ -172,6 +172,7 @@ const EquipmentFilters: React.FC<EquipmentFiltersProps> = ({ onFilter, sectorId,
       <TextInput
         style={styles.input}
         placeholder="Pesquisar Cliente..."
+        placeholderTextColor="#888"
         value={clientQuery}
         onChangeText={setClientQuery}
       />
@@ -195,6 +196,7 @@ const EquipmentFilters: React.FC<EquipmentFiltersProps> = ({ onFilter, sectorId,
       <TextInput
         style={styles.input}
         placeholder="Pesquisar Setor..."
+        placeholderTextColor="#888"
         value={sectorQuery}
         onChangeText={setSectorQuery}
         editable={!!filters.client_id} // Editável apenas se um cliente for selecionado
@@ -217,12 +219,14 @@ const EquipmentFilters: React.FC<EquipmentFiltersProps> = ({ onFilter, sectorId,
       <TextInput
         style={styles.input}
         placeholder="Busca por Tag ou Patrimônio"
+        placeholderTextColor="#888"
         onChangeText={(text) => setFilters({ ...filters, search: text })}
         value={filters.search}
       />
       <TextInput
         style={styles.input}
         placeholder="Pesquisar Fabricante..."
+        placeholderTextColor="#888"
         value={brandQuery}
         onChangeText={handleBrandQueryChange}
       />
@@ -239,6 +243,7 @@ const EquipmentFilters: React.FC<EquipmentFiltersProps> = ({ onFilter, sectorId,
       <TextInput
         style={styles.input}
         placeholder="Pesquisar Tipo de Equipamento..."
+        placeholderTextColor="#888"
         value={typeQuery}
         onChangeText={handleTypeQueryChange}
       />
@@ -314,4 +319,3 @@ function setLoadingClients(arg0: boolean) {
 function setLoadingSectors(arg0: boolean) {
   throw new Error("Function not implemented.");
 }
-

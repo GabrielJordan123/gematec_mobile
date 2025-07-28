@@ -135,12 +135,12 @@ const CreateServiceOrderScreen = ({ navigation }: { navigation: any }) => {
             {/* Resumo do Equipamento Selecionado */}
             {selectedEquipment && (
                 <View style={styles.summaryContainer}>
-                    <Text>Tag: {selectedEquipment.tag}</Text>
-                    <Text>Patrimônio: {selectedEquipment.patrimony}</Text>
-                    <Text>Série: {selectedEquipment.serial_number}</Text>
-                    <Text>Fabricante: {selectedEquipment.brand}</Text>
-                    <Text>Tipo: {selectedEquipment.equipment_type}</Text>
-                    <Text>Tecnologia: {selectedEquipment.technology}</Text>
+                    <Text>Tag: {String(selectedEquipment.tag)}</Text>
+                    <Text>Patrimônio: {String(selectedEquipment.patrimony)}</Text>
+                    <Text>Série: {String(selectedEquipment.serial_number)}</Text>
+                    <Text>Fabricante: {String(selectedEquipment.brand)}</Text>
+                    <Text>Tipo: {String(selectedEquipment.equipment_type)}</Text>
+                    <Text>Tecnologia: {String(selectedEquipment.technology)}</Text>
                 </View>
             )}
 

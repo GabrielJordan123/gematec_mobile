@@ -8,27 +8,15 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use(
-    async (config: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
+    async (config) => {
         const accessToken = await AsyncStorage.getItem("access_token");
-        const slidingToken = await AsyncStorage.getItem("sliding_token");
-
-        if (!config.headers) {
-            config.headers = {} as any;
-        }
-
-        // Usa o sliding token para os endpoints /accounts e /account/switch
-        if (config.url?.includes("/accounts") || config.url?.includes("/account/switch")) {
-            if (slidingToken) {
-                config.headers.Authorization = `Bearer ${slidingToken}`;
-            }
-        } else if (accessToken) {
-            // Usa o access token para os outros endpoints
+        if (accessToken) {
+            config.headers = config.headers || {};
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
-
         return config;
     },
-    (error: AxiosError) => Promise.reject(error)
+    (error) => Promise.reject(error)
 );
 
 apiClient.interceptors.response.use(
@@ -36,7 +24,7 @@ apiClient.interceptors.response.use(
     async (error: AxiosError) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.endsWith('/token')) {
             originalRequest._retry = true;
 
             try {

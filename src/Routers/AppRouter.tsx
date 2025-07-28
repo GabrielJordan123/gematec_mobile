@@ -77,9 +77,13 @@ export type RootStackParamList = {
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-const AppRouter: React.FC = () => {
+interface AppRouterProps {
+  isAuthenticated: boolean;
+}
+
+const AppRouter: React.FC<AppRouterProps> = ({ isAuthenticated }) => {
   return (
-    <Stack.Navigator initialRouteName="LoginScreen">
+    <Stack.Navigator initialRouteName={isAuthenticated ? "HomeScreen" : "LoginScreen"}>
       <Stack.Screen name="QRCodeScreen" component={QRCodeScreen} options={{ headerShown: false }} />
       <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerTitle: 'Login' }} />
       <Stack.Screen name="PersonalDataScreen" component={PersonalDataScreen} options={{ headerTitle: 'Meus Dados' }} />

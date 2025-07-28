@@ -7,7 +7,10 @@ import { MenuItem } from "../Models/MenuItem";
 export default class MenuService {
     static async fetchDynamicMenu(): Promise<MenuItem[]> {
         try {
-            const token = await AsyncStorage.getItem("access_token");
+            // LOG: access_token antes de buscar o menu
+            const accessToken = await AsyncStorage.getItem("access_token");
+            console.log("[MenuService] access_token usado para buscar menu:", accessToken);
+            const token = await AsyncStorage.getItem("sliding_token");
             if (!token) {
                 throw new Error("Token de acesso não encontrado.");
             }
@@ -15,11 +18,7 @@ export default class MenuService {
             const endpoint = `${API_BASE_URL}/me/menu?app=mobile`;
             console.log("[MenuService] Buscando menu dinâmico do endpoint:", endpoint);
 
-            const response = await apiClient.get(endpoint, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await apiClient.get(endpoint);
 
             console.log("[MenuService] Resposta do menu dinâmico:", response.data);
             return response.data; // A API deve retornar diretamente um array de MenuItem

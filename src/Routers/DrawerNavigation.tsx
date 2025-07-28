@@ -165,18 +165,16 @@ const CustomDrawerContent = (props: any & { extraData: {} }) => {
     if (item.items && item.items.length > 0) {
       return (
         <View key={item.slug}>
-          <View style={[styles.menuItem, { paddingLeft }]}>
-            <TouchableOpacity
-              style={styles.menuMainText}
-              onPress={() => toggleSubmenu(item.slug)}
-            >
+          <TouchableOpacity
+            style={[styles.menuItem, { paddingLeft }]}
+            onPress={() => toggleSubmenu(item.slug)}
+          >
+            <View style={styles.menuMainText}>
               {item.icon && <Ionicons name={item.icon as any} size={20} color="#333" style={styles.icon} />}
               <Text style={styles.menuText}>{item.title}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => toggleSubmenu(item.slug)} style={styles.expandIcon}>
-              <Text style={styles.expandText}>{isSubmenuExpanded ? "▲" : "▼"}</Text>
-            </TouchableOpacity>
-          </View>
+            </View>
+            <Text style={styles.expandText}>{isSubmenuExpanded ? "▲" : "▼"}</Text>
+          </TouchableOpacity>
           {isSubmenuExpanded && (
             <View style={styles.submenu}>
               {item.items.map((childItem) => renderMenuItem(childItem, level + 1))}
@@ -258,6 +256,7 @@ const CustomDrawerContent = (props: any & { extraData: {} }) => {
         <Ionicons name="arrow-forward" size={20} color="#333" style={styles.icon} />
         <Text style={styles.menuText}>Sair</Text>
       </TouchableOpacity>
+
     </DrawerContentScrollView>
   );
 };

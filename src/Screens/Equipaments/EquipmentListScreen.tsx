@@ -115,7 +115,7 @@ const EquipmentListScreen: React.FC<EquipmentListScreenProps> = ({
   const renderEquipmentItem = ({ item }: { item: any }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemText}>ID: {item.id}</Text>
-      <Text style={styles.itemText}>Nome: {item.patrimony}</Text>
+      <Text style={styles.itemText}>Tag: {item.patrimony}</Text>
 
       <TouchableOpacity
         style={styles.editButton}

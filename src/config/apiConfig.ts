@@ -2,7 +2,7 @@
 
 // URLs base para os ambientes
 const API_BASE_URLS = {
-    production: "https://keosstg001.xyz/api",
+    production: "https://prod.keosstg001.xyz/api",
     homologation: "https://keosstg001.xyz/api",
 };
 
