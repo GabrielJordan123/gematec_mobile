@@ -1,9 +1,9 @@
-
+// file: src/Context/UserContext.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AuthService from "../Services/AuthService";
 import jwtDecode from "jwt-decode";
-
+import { useLanguage } from "./LanguageContext"; // Importe o useLanguage
 
 interface UserContextType {
   username: string;
@@ -40,6 +40,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [account, setAccount] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { loadUserPreferences } = useLanguage(); // Use o hook useLanguage
 
   const isTokenExpired = (token: string): boolean => {
     try {
@@ -77,6 +78,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
               await AsyncStorage.setItem("access_token", newAccessToken);
               console.log("[UserContext] Token renovado com sucesso.");
               setIsAuthenticated(true);
+              await loadUserPreferences(newAccessToken); // Carrega preferências após renovar
             } catch (error) {
               console.error("[UserContext] Falha ao renovar token:", error);
               await AsyncStorage.multiRemove(["access_token", "refresh_token", "account", "keep_logged_in"]);
@@ -85,6 +87,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             console.log("[UserContext] Usuário logado encontrado.");
             setIsAuthenticated(true);
+            await loadUserPreferences(accessToken); // Carrega preferências se o token for válido
           }
         } else {
           console.log("[UserContext] Nenhum usuário logado encontrado. Limpando dados.");
@@ -122,7 +125,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const decoded: any = jwtDecode(accessToken);
       setUsername(decoded.user_name || "");
-      await AsyncStorage.setItem("permissions", decoded.permissions?.join(",") || "");
+      // Não precisamos mais salvar permissões do token aqui, pois virão do /me/permissions
+      // await AsyncStorage.setItem("permissions", decoded.permissions?.join(",") || "");
+
+      await loadUserPreferences(accessToken); // Carrega preferências após o login bem-sucedido
 
       console.log("[UserContext] Login realizado com sucesso:", {
         account: accountName,

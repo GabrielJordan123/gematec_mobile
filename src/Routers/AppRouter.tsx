@@ -29,6 +29,8 @@ import TechnicalAssistanceDetailsScreen from "../Screens/TechnicalAssistance/Tec
 import ManualDetailsScreen from "../Screens/ManualDetailsScreen";
 import ManualsScreen from "../Screens/ManualsScreen";
 import SubSectorScreen from '../Screens/Clients/SubSectorScreen';
+import PreferencesScreen from '../Screens/PreferencesScreen'; // Importe a PreferencesScreen
+import { useUser } from '../Context/UserContext';
 
 export type RootStackParamList = {
   CondenserTypesScreen: undefined;
@@ -73,15 +75,22 @@ export type RootStackParamList = {
   SubSectorScreen: { clientId: number; parentSector: { id: number; name: string; level: number; complete_name: string } };
   ViewResponseActivityScreen: { serviceOrderId: number; equipmentStatus: string };
   RespondOrderScreen: { serviceOrderId: number; questions: string; equipmentId?: number };
+  PreferencesScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-interface AppRouterProps {
+/*interface AppRouterProps {
   isAuthenticated: boolean;
-}
+}*/
 
-const AppRouter: React.FC<AppRouterProps> = ({ isAuthenticated }) => {
+const AppRouter: React.FC = () => {
+  const { isAuthenticated, isLoading } = useUser(); // Obtenha o estado de autenticação do UserContext
+
+  if (isLoading) {
+    // Você pode renderizar um componente de carregamento aqui se desejar
+    return null; // Ou um ActivityIndicator, etc.
+  }
   return (
     <Stack.Navigator initialRouteName={isAuthenticated ? "AuthenticatedFlow" : "LoginScreen"}>
       <Stack.Screen name="AuthenticatedFlow" component={DrawerNavigator} options={{ headerShown: false }} />
@@ -112,6 +121,7 @@ const AppRouter: React.FC<AppRouterProps> = ({ isAuthenticated }) => {
       <Stack.Screen name="ManualDetailsScreen" component={ManualDetailsScreen} options={{ headerTitle: '' }} />
       <Stack.Screen name="RespondOrderScreen" component={RespondOrderScreen} options={{ title: "Responder Plano de Atividade de uma Ordem de Serviço" }} />
       <Stack.Screen name="SubSectorScreen" component={SubSectorScreen} options={{ headerTitle: 'Sub-setores' }} />
+      <Stack.Screen name="PreferencesScreen" component={PreferencesScreen} options={{ headerTitle: 'Preferências' }} />
     </Stack.Navigator>
   );
 };

@@ -1,8 +1,8 @@
-
+// file: src/Context/ApiClient.ts
 import axios, { InternalAxiosRequestConfig, AxiosError, AxiosResponse } from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setDynamicApiUrl } from "../config/apiConfig";
-import jwtDecode from "jwt-decode";
+// import jwtDecode from "jwt-decode"; // Remova esta linha se não for usada em outro lugar neste arquivo
 
 const apiClient = axios.create({
     timeout: 10000,
@@ -22,8 +22,8 @@ apiClient.interceptors.request.use(
             config.headers = config.headers || {};
             config.headers.Authorization = `Bearer ${accessToken}`;
             // Set dynamic base URL
-            const decodedToken: any = jwtDecode(accessToken);
-            const accountName = decodedToken?.account_name || "default";
+            // const decodedToken: any = jwtDecode(accessToken); // Remova esta linha
+            const accountName = await AsyncStorage.getItem("account") || "default"; // Obtenha o nome da conta do AsyncStorage
             config.baseURL = setDynamicApiUrl(accountName);
         }
 

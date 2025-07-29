@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+// file: src/Context/PermissionsContext.tsx
+import React, { createContext, useContext, useState } from 'react'; // Removido useEffect
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 interface PermissionContextType {
   permissions: string[];
   setPermissions: (permissions: string[]) => void;
@@ -21,20 +23,20 @@ export const usePermissions = () => {
 };
 
 export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [permissions, setPermissions] = useState<string[]>([]);
-
-  useEffect(() => {
-    const loadPermissions = async () => {
-      const storedPermissions = await AsyncStorage.getItem("permissions");
-      if (storedPermissions) {
-        setPermissions(JSON.parse(storedPermissions));
-      }
-    };
-    loadPermissions();
-  }, []);
+  // Permissões mockadas para desenvolvimento.
+  // Estas serão substituídas por permissões reais do backend futuramente.
+  const [permissions, setPermissions] = useState<string[]>([
+    "clients.list_clients",
+    "equipments.list_equipments",
+    "activities.list_activitytypes",
+    "manuals.view_manual",
+    "view_user", // Para a tela de Meus Dados
+    // Adicione outras permissões conforme necessário para testar o menu
+  ]);
 
   const savePermissions = async (newPermissions: string[]) => {
-    await AsyncStorage.setItem("permissions", JSON.stringify(newPermissions));
+    // Por enquanto, não salvaremos no AsyncStorage para evitar conflitos com o mock.
+    // await AsyncStorage.setItem("permissions", JSON.stringify(newPermissions));
     setPermissions(newPermissions);
   };
 
@@ -48,7 +50,7 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   return (
-    <PermissionContext.Provider value={{ permissions, setPermissions, hasPermission }}>
+    <PermissionContext.Provider value={{ permissions, setPermissions: savePermissions, hasPermission }}>
       {children}
     </PermissionContext.Provider>
   );

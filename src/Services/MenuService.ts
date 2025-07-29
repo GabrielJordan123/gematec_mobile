@@ -1,8 +1,7 @@
-
+// file: src/Services/MenuService.ts
 import apiClient from "../Context/ApiClient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setDynamicApiUrl } from "../config/apiConfig";
-import jwtDecode from "jwt-decode"; // Importação padrão
 import { MenuItem } from "../Models/MenuItem";
 
 export default class MenuService {
@@ -15,8 +14,8 @@ export default class MenuService {
             }
 
             // Decodificar o token para obter o accountName
-            const decodedToken: any = jwtDecode(accessToken);
-            const accountName = decodedToken?.account_name || "default";
+            // const decodedToken: any = jwtDecode(accessToken); // Remova esta linha
+            const accountName = await AsyncStorage.getItem("account") || "default"; // Obtenha o nome da conta do AsyncStorage
             const dynamicBaseUrl = setDynamicApiUrl(accountName);
             const endpoint = `/me/menu?app=mobile`;
 
