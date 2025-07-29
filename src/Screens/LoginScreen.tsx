@@ -11,6 +11,7 @@ import { decodeToken } from "../Services/PermissionsService";
 import PermissionsContext, { usePermissions } from "../Context/PermissionsContext";
 import { useUser } from "../Context/UserContext";
 import { RootStackParamList } from "../Routers/AppRouter";
+import { useAppNavigation } from "../Context/NavigationContext";
 
 interface LoginScreenProps {
   route: RouteProp<RootStackParamList, 'LoginScreen'>;
@@ -26,6 +27,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ route, navigation }) => {
   const [accountError, setAccountError] = useState("");
   const { setPermissions } = useContext(PermissionsContext);
   const { setUsername, login } = useUser();
+  const appNavigation = useAppNavigation();
   useEffect(() => {
     const loadKeepLoggedIn = async () => {
       try {
@@ -117,7 +119,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ route, navigation }) => {
         console.error('Erro ao decodificar token:', tokenError);
         // Não bloquear o login por isso, apenas usar valores padrão
       }
-
+      // Navegar explicitamente para a HomeScreen após o login
+      appNavigation.reset({
+        index: 0,
+        routes: [{ name: 'HomeScreen' }],
+      });
       // A navegação para a tela inicial será tratada automaticamente pelo AppRouter
       // com base no estado de autenticação do UserContext.
     } catch (error: any) {

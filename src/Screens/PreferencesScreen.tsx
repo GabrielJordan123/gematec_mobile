@@ -84,6 +84,7 @@ const PreferencesScreen: React.FC = () => {
                         >
                             {languageOptions.map((option) => (
                                 <Picker.Item
+                                    key={option.value}
                                     label={option.label}
                                     value={option.value}
                                 />

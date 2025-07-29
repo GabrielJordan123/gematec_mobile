@@ -1,6 +1,9 @@
 import React from 'react';
+
+
 import { createStackNavigator } from '@react-navigation/stack';
 import QRCodeScreen from '../Screens/QRCodeScreen';
+import { Text, StyleSheet } from 'react-native';
 import LoginScreen from '../Screens/LoginScreen';
 import PersonalDataScreen from '../Screens/PersonalDataScreen';
 import EquipmentDetailsScreen from '../Screens/Equipaments/EquipamentDetails';
@@ -31,6 +34,7 @@ import ManualsScreen from "../Screens/ManualsScreen";
 import SubSectorScreen from '../Screens/Clients/SubSectorScreen';
 import PreferencesScreen from '../Screens/PreferencesScreen'; // Importe a PreferencesScreen
 import { useUser } from '../Context/UserContext';
+import { ActivityIndicator, View } from 'react-native';
 
 export type RootStackParamList = {
   CondenserTypesScreen: undefined;
@@ -88,8 +92,12 @@ const AppRouter: React.FC = () => {
   const { isAuthenticated, isLoading } = useUser(); // Obtenha o estado de autenticação do UserContext
 
   if (isLoading) {
-    // Você pode renderizar um componente de carregamento aqui se desejar
-    return null; // Ou um ActivityIndicator, etc.
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007BFF" />
+        <Text style={styles.loadingText}>Carregando...</Text>
+      </View>
+    );
   }
   return (
     <Stack.Navigator initialRouteName={isAuthenticated ? "AuthenticatedFlow" : "LoginScreen"}>
@@ -125,5 +133,18 @@ const AppRouter: React.FC = () => {
     </Stack.Navigator>
   );
 };
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
+  },
+});
 
 export default AppRouter;
