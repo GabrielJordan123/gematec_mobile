@@ -1,27 +1,32 @@
 import axios from "axios";
-import { API_BASE_URL } from "../config/apiConfig";
+import { API_BASE_URL, buildApiUrlForAccount } from "../config/apiConfig";
 import apiClient from "../Context/ApiClient";
 
 
 export default class AuthService {
-  static async login(email: string, password: string) {
+  static async login(account: string, email: string, password: string) {
     try {
-      // Log do endpoint final
-      const endpoint = `${API_BASE_URL}/token`;
-      console.log('Tentando autenticar no endpoint:', endpoint);
-      console.log('Payload:', { email, password });
-
-      const response = await apiClient.post(endpoint, { email, password });
-
-      console.log('Resposta bem-sucedida da API:', response.data);
-      return {
-        sliding_token: response.data.token,
-      };
+      // Montar a URL dinâmica com o subdomínio da conta
+      const apiUrl = buildApiUrlForAccount(account);
+      const endpoint = `${apiUrl}/token`;
+      console.log('[AuthService] Endpoint de login dinâmico:', endpoint);
+      const response = await axios.post(endpoint, { email, password });
+      return response.data;
     } catch (error: any) {
-      console.error('Erro ao realizar a requisição de login:', error);
+      console.error('[AuthService] Erro ao realizar a requisição de login:', error);
+
+      // Log detalhado do erro
+      if (error.config) {
+        console.error('[AuthService] Configuração da requisição que falhou:', {
+          url: error.config.url,
+          baseURL: error.config.baseURL,
+          method: error.config.method,
+          headers: error.config.headers
+        });
+      }
 
       if (error.response) {
-        console.error('Detalhes do erro na resposta da API:', {
+        console.error('[AuthService] Detalhes do erro na resposta da API:', {
           status: error.response.status,
           data: error.response.data,
           headers: error.response.headers,
@@ -39,10 +44,11 @@ export default class AuthService {
           throw new Error(`Erro inesperado: ${error.response.status}.`);
         }
       } else if (error.request) {
-        console.error('Nenhuma resposta recebida do servidor:', error.request);
+        console.error('[AuthService] Nenhuma resposta recebida do servidor:', error.request);
+        console.error('[AuthService] URL que falhou:', error.request._url);
         throw new Error('Erro ao conectar ao servidor. Verifique sua conexão com a internet.');
       } else {
-        console.error('Erro na configuração da requisição:', error.message);
+        console.error('[AuthService] Erro na configuração da requisição:', error.message);
         throw new Error(`Erro inesperado: ${error.message}`);
       }
     }
@@ -160,7 +166,7 @@ export default class AuthService {
       }
     }
   }
-  static async updatePersonalData(accessToken: string, updatedData: { name?: string; birthdate?: string; rh_factor?: string }) {
+  static async updatePersonalData(accessToken: string, updatedData: { name?: string; birthdate?: string; rh_factor?: string; }) {
     try {
       const endpoint = `${API_BASE_URL}/me`;
       console.log('Atualizando dados pessoais no endpoint:', endpoint);
@@ -186,7 +192,7 @@ export default class AuthService {
       throw new Error('Erro ao conectar ao servidor.');
     }
   }
-  static async getPersonalData(accessToken: string) {
+  static async getPersonalData(accessToken: string, token: string) {
     try {
       console.log('Iniciando requisição para dados pessoais...');
       console.log('Endpoint usado:', `${API_BASE_URL}}/me`);

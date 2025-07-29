@@ -1,5 +1,9 @@
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import AuthService from "../Services/AuthService";
+import jwtDecode from "jwt-decode";
+
 
 interface UserContextType {
   username: string;
@@ -10,10 +14,10 @@ interface UserContextType {
   setSectorId: (id: number | null) => void;
   equipmentId: number | null;
   setEquipmentId: (id: number | null) => void;
-  accountId: number | null;
-  setAccountId: (id: number | null) => void;
+  account: string | null;
+  setAccount: (account: string | null) => void;
   isAuthenticated: boolean;
-  login: (token: string, keepLoggedIn: boolean) => Promise<void>;
+  login: (accessToken: string, refreshToken: string, account: string, keepLoggedIn: boolean) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -33,80 +37,141 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [clientId, setClientId] = useState<number | null>(null);
   const [sectorId, setSectorId] = useState<number | null>(null);
   const [equipmentId, setEquipmentId] = useState<number | null>(null);
-  const [accountId, setAccountId] = useState<number | null>(null);
+  const [account, setAccount] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const isTokenExpired = (token: string): boolean => {
+    try {
+      const decoded: any = jwtDecode(token);
+      const currentTime = Math.floor(Date.now() / 1000);
+      return decoded.exp < currentTime;
+    } catch (error) {
+      console.error("[UserContext] Erro ao decodificar token:", error);
+      return true;
+    }
+  };
+
   useEffect(() => {
     const loadPersistedData = async () => {
+      console.log("[UserContext] Calling loadPersistedData...");
       try {
         const storedClientId = await AsyncStorage.getItem("selectedClientId");
         const storedSectorId = await AsyncStorage.getItem("selectedSectorId");
-        const storedAccountId = await AsyncStorage.getItem("selectedAccountId");
         const storedEquipmentId = await AsyncStorage.getItem("selectedEquipmentId");
-        const slidingToken = await AsyncStorage.getItem('sliding_token');
-        const keepLoggedIn = await AsyncStorage.getItem('keep_logged_in');
-        let accessToken = await AsyncStorage.getItem('access_token');
+        const storedAccount = await AsyncStorage.getItem("account");
+        const accessToken = await AsyncStorage.getItem("access_token");
+        const refreshToken = await AsyncStorage.getItem("refresh_token");
+        const keepLoggedIn = await AsyncStorage.getItem("keep_logged_in");
 
         if (storedClientId) setClientId(parseInt(storedClientId));
         if (storedSectorId) setSectorId(parseInt(storedSectorId));
         if (storedEquipmentId) setEquipmentId(parseInt(storedEquipmentId));
-        if (storedAccountId) setAccountId(parseInt(storedAccountId));
+        if (storedAccount) setAccount(storedAccount);
 
-        if (keepLoggedIn === 'true' && slidingToken && storedAccountId) {
-          if (!accessToken) {
-            // Troca de conta para obter access_token
+        if (accessToken && refreshToken && storedAccount) {
+          if (isTokenExpired(accessToken)) {
+            console.log("[UserContext] Access token expirado. Tentando renovar...");
             try {
-              const { access } = await import('../Services/AuthService').then(m => m.default.switchAccount(slidingToken, Number(storedAccountId)));
-              accessToken = access;
-              await AsyncStorage.setItem('access_token', accessToken);
-              console.log('[UserContext] access_token obtido e salvo:', accessToken);
-            } catch (e) {
-              console.error('[UserContext] Erro ao obter access_token:', e);
+              const newAccessToken = await AuthService.refreshAccessToken(refreshToken);
+              await AsyncStorage.setItem("access_token", newAccessToken);
+              console.log("[UserContext] Token renovado com sucesso.");
+              setIsAuthenticated(true);
+            } catch (error) {
+              console.error("[UserContext] Falha ao renovar token:", error);
+              await AsyncStorage.multiRemove(["access_token", "refresh_token", "account", "keep_logged_in"]);
+              setIsAuthenticated(false);
             }
-          }
-          if (accessToken) {
-            setIsAuthenticated(true);
           } else {
-            setIsAuthenticated(false);
+            console.log("[UserContext] Usuário logado encontrado.");
+            setIsAuthenticated(true);
           }
         } else {
+          console.log("[UserContext] Nenhum usuário logado encontrado. Limpando dados.");
+          await AsyncStorage.multiRemove(["access_token", "refresh_token", "account", "keep_logged_in"]);
           setIsAuthenticated(false);
-          await AsyncStorage.removeItem('sliding_token');
-          await AsyncStorage.removeItem('access_token');
         }
       } catch (error) {
-        console.error("Failed to load persisted data:", error);
+        console.error("[UserContext] Failed to load persisted data:", error);
+        setIsAuthenticated(false);
       } finally {
         console.log("[UserContext] loadPersistedData finished. Setting isLoading to false.");
         setIsLoading(false);
       }
     };
-    console.log("[UserContext] Calling loadPersistedData...");
+
     loadPersistedData();
   }, []);
 
-  const login = async (token: string, keepLoggedIn: boolean) => {
-    await AsyncStorage.setItem('sliding_token', token);
-    await AsyncStorage.setItem('keep_logged_in', String(keepLoggedIn));
-    setIsAuthenticated(true);
-    // LOG: sliding_token salvo
-    const savedSlidingToken = await AsyncStorage.getItem('sliding_token');
-    console.log('[UserContext] sliding_token salvo:', savedSlidingToken);
-    // LOG: access_token salvo (se já existir)
-    const savedAccessToken = await AsyncStorage.getItem('access_token');
-    console.log('[UserContext] access_token salvo:', savedAccessToken);
+  const login = async (accessToken: string, refreshToken: string, accountName: string, keepLoggedIn: boolean) => {
+    if (!accessToken || typeof accessToken !== "string" || !refreshToken || typeof refreshToken !== "string") {
+      const errorMessage = `[UserContext] Tentativa de login com tokens inválidos. accessToken: ${accessToken}, refreshToken: ${refreshToken}`;
+      console.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+    try {
+      await AsyncStorage.multiSet([
+        ["access_token", accessToken],
+        ["refresh_token", refreshToken],
+        ["account", accountName],
+        ["keep_logged_in", String(keepLoggedIn)],
+      ]);
+
+      setAccount(accountName);
+      setIsAuthenticated(true);
+
+      const decoded: any = jwtDecode(accessToken);
+      setUsername(decoded.user_name || "");
+      await AsyncStorage.setItem("permissions", decoded.permissions?.join(",") || "");
+
+      console.log("[UserContext] Login realizado com sucesso:", {
+        account: accountName,
+        keepLoggedIn,
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+      });
+    } catch (error) {
+      console.error("[UserContext] Erro ao salvar dados de login:", error);
+      throw error;
+    }
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('sliding_token');
-    await AsyncStorage.removeItem('keep_logged_in');
-    setIsAuthenticated(false);
-    setUsername("");
-    setClientId(null);
-    setSectorId(null);
-    setEquipmentId(null);
-    setAccountId(null);
+    try {
+      const refreshToken = await AsyncStorage.getItem("refresh_token");
+      if (refreshToken) {
+        try {
+          await AuthService.revoke(refreshToken);
+          console.log("[UserContext] Token revogado com sucesso no logout");
+        } catch (revokeError) {
+          console.error("[UserContext] Erro ao revogar token no logout:", revokeError);
+        }
+      }
+
+      await AsyncStorage.multiRemove([
+        "access_token",
+        "refresh_token",
+        "account",
+        "keep_logged_in",
+        "permissions",
+        "selectedClientId",
+        "selectedSectorId",
+        "selectedEquipmentId",
+      ]);
+
+      setIsAuthenticated(false);
+      setUsername("");
+      setClientId(null);
+      setSectorId(null);
+      setEquipmentId(null);
+      setAccount(null);
+
+      console.log("[UserContext] Logout realizado com sucesso");
+    } catch (error) {
+      console.error("[UserContext] Erro durante logout:", error);
+      setIsAuthenticated(false);
+      setAccount(null);
+    }
   };
 
   const saveUsername = async (name: string) => {
@@ -114,13 +179,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUsername(name);
   };
 
-  const saveAccountId = async (id: number | null) => {
-    if (id) {
-      await AsyncStorage.setItem("selectedAccountId", id.toString());
+  const saveAccount = async (accountName: string | null) => {
+    if (accountName) {
+      await AsyncStorage.setItem("account", accountName);
     } else {
-      await AsyncStorage.removeItem("selectedAccountId");
+      await AsyncStorage.removeItem("account");
     }
-    setAccountId(id);
+    setAccount(accountName);
   };
 
   return (
@@ -134,8 +199,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSectorId,
         equipmentId,
         setEquipmentId,
-        accountId,
-        setAccountId: saveAccountId,
+        account,
+        setAccount: saveAccount,
         isAuthenticated,
         login,
         logout,

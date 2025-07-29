@@ -9,7 +9,6 @@ import CreateEquipmentScreen from '../Screens/Equipaments/CreateEquipmentScreen'
 import EditEquipmentScreen from '../Screens/Equipaments/EditEquipmentScreen';
 import { ClientsAvulsosScreen, ClientsComContratoScreen } from "../Screens/Clients/Client";
 import HomeScreen from '../Screens/HomeScreen';
-import AccountSelectionScreen from "../Screens/AccountSelectionScreen";
 import DrawerNavigator from "./DrawerNavigation";
 import EquipamentScreen from '../Screens/Equipaments/EquipamentScreen';
 import EquipmentQRCodeScreen from '../Screens/Equipaments/EquipmentQRCodeScreen';
@@ -30,6 +29,7 @@ import TechnicalAssistanceDetailsScreen from "../Screens/TechnicalAssistance/Tec
 import ManualDetailsScreen from "../Screens/ManualDetailsScreen";
 import ManualsScreen from "../Screens/ManualsScreen";
 import SubSectorScreen from '../Screens/Clients/SubSectorScreen';
+
 export type RootStackParamList = {
   CondenserTypesScreen: undefined;
   EvaporatorTypesScreen: undefined;
@@ -49,8 +49,8 @@ export type RootStackParamList = {
   ClientsComContratoScreen: undefined;
   ManualsScreen: undefined;
   ClientDetailScreen: { clientId: number };
-  AccountSelectionScreen: undefined;
   HomeScreen: undefined;
+  AuthenticatedFlow: undefined;
   EquipamentScreen: { clientId: number; sectorId: number, subsectorId?: number };
   CreateServiceOrderScreen: { equipmentId: number; equipmentStatus: string };
   CreateEquipmentScreen: undefined;
@@ -83,8 +83,8 @@ interface AppRouterProps {
 
 const AppRouter: React.FC<AppRouterProps> = ({ isAuthenticated }) => {
   return (
-    <Stack.Navigator initialRouteName={isAuthenticated ? "HomeScreen" : "LoginScreen"}>
-      <Stack.Screen name="QRCodeScreen" component={QRCodeScreen} options={{ headerShown: false }} />
+    <Stack.Navigator initialRouteName={isAuthenticated ? "AuthenticatedFlow" : "LoginScreen"}>
+      <Stack.Screen name="AuthenticatedFlow" component={DrawerNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerTitle: 'Login' }} />
       <Stack.Screen name="PersonalDataScreen" component={PersonalDataScreen} options={{ headerTitle: 'Meus Dados' }} />
       <Stack.Screen name="ClientsAvulsosScreen" component={ClientsAvulsosScreen} options={{ headerTitle: 'Clientes Avulsos' }} />
@@ -95,7 +95,6 @@ const AppRouter: React.FC<AppRouterProps> = ({ isAuthenticated }) => {
       <Stack.Screen name="EquipamentScreen" component={EquipamentScreen} options={{ headerTitle: 'Filtragem de Equipamentos' }} />
       <Stack.Screen name="EquipmentDetailsScreen" component={EquipmentDetailsScreen} options={{ headerTitle: 'Detalhes do Equipamento' }} />
       <Stack.Screen name="EquipmentListScreen" component={EquipmentListScreen} options={{ headerTitle: "Listagem de Equipamentos" }} />
-      <Stack.Screen name="AccountSelectionScreen" component={AccountSelectionScreen} options={{ headerTitle: 'Selecionar Conta' }} />
       <Stack.Screen name="CreateEquipmentScreen" component={CreateEquipmentScreen} options={{ headerTitle: 'Criação de Equipamento' }} />
       <Stack.Screen name="EquipmentQRCodeScreen" component={EquipmentQRCodeScreen} options={{ headerTitle: 'Leitura QR Code' }} />
       <Stack.Screen name="EditEquipmentScreen" component={EditEquipmentScreen} options={{ headerTitle: 'Editar Equipamento' }} />
@@ -112,7 +111,6 @@ const AppRouter: React.FC<AppRouterProps> = ({ isAuthenticated }) => {
       <Stack.Screen name="CreateServiceOrderScreen" component={CreateServiceOrderScreen} options={{ title: "Criar Nova Ordem de Serviço" }} />
       <Stack.Screen name="ManualDetailsScreen" component={ManualDetailsScreen} options={{ headerTitle: '' }} />
       <Stack.Screen name="RespondOrderScreen" component={RespondOrderScreen} options={{ title: "Responder Plano de Atividade de uma Ordem de Serviço" }} />
-      <Stack.Screen name="HomeScreen" component={DrawerNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="SubSectorScreen" component={SubSectorScreen} options={{ headerTitle: 'Sub-setores' }} />
     </Stack.Navigator>
   );

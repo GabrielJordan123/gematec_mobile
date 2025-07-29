@@ -1,97 +1,118 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'; // Added TouchableOpacity
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuthService from '../Services/AuthService';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../Routers/AppRouter';
 import { usePermissions } from "../Context/PermissionsContext";
 import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useUser } from '../Context/UserContext';
+import PersonalDataModel from '../Models/PersonalData'; // Import the updated model
 
-import { API_BASE_URL } from '../config/apiConfig';
 interface PersonalDataScreenProps {
   route: RouteProp<RootStackParamList, 'PersonalDataScreen'>;
   navigation: DrawerNavigationProp<RootStackParamList, 'PersonalDataScreen'>;
 }
 
-
-const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route }) => {
+const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route, navigation }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const { hasPermission, permissions } = usePermissions();
+  const { account, logout } = useUser(); // Added logout from useUser
   const [loading, setLoading] = useState(true);
+  const [personalData, setPersonalData] = useState<PersonalDataModel | null>(null); // State to hold fetched data
 
-  if (permissions.length === 0 && loading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.emptyText}>Carregando permissões...</Text>
-      </View>
-    );
-  }
-
-  if (!hasPermission("view_user")) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Você não tem permissão para visualizar seus dados.</Text>
-      </View>
-    );
-  }
-  // Campos editáveis
+  // Editable fields
   const [name, setName] = useState('');
   const [birthdate, setBirthdate] = useState('');
   const [rhFactor, setRhFactor] = useState('');
 
-  // Campos não editáveis
+  // Non-editable fields (derived from personalData)
   const [email, setEmail] = useState('');
   const [document, setDocument] = useState('');
   const [rg, setRg] = useState('');
   const [phone, setPhone] = useState('');
   const [ctps, setCtps] = useState('');
   const [admissionDate, setAdmissionDate] = useState('');
+  const [group, setGroup] = useState<any>(null); // Assuming 'any' for now, or define a Group interface
+  const [role, setRole] = useState<any>(null);   // Assuming 'any' for now, or define a Role interface
+
+  // Edit mode state
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Password change state
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const canEdit = hasPermission("users.change_me");
 
   useEffect(() => {
     const fetchPersonalData = async () => {
       try {
+        setLoading(true);
         console.log('Buscando dados pessoais do usuário...');
         const token = await AsyncStorage.getItem('access_token');
-
+        const currentAccount = await AsyncStorage.getItem('account');
 
         if (!token) throw new Error('Token de acesso não encontrado.');
-
+        if (!currentAccount) throw new Error('Conta não encontrada.');
 
         setAccessToken(token);
 
-        console.log('Endpoint usado:', `${API_BASE_URL}/me`);
+        console.log('Conta:', currentAccount);
         console.log('Token de acesso:', token);
 
-        const personalData = await AuthService.getPersonalData(token);
-        console.log('Dados pessoais recebidos:', personalData);
+        const fetchedData = await AuthService.getPersonalData(currentAccount, token);
+        const personalDataInstance = new PersonalDataModel(fetchedData); // Create instance
+        setPersonalData(personalDataInstance); // Store the instance
 
-        // Atualiza os campos
-        setName(personalData.name || '');
-        setBirthdate(personalData.birthdate || '');
-        setRhFactor(personalData.rh_factor || '');
-        setEmail(personalData.email || 'Não informado');
-        setDocument(personalData.document || 'Não informado');
-        setRg(personalData.rg || 'Não informado');
-        setPhone(personalData.phone || 'Não informado');
-        setCtps(personalData.ctps || 'Não informado');
-        setAdmissionDate(personalData.admission_date || 'Não informado');
+        // Update editable fields
+        setName(personalDataInstance.name || '');
+        setBirthdate(personalDataInstance.birthdate || '');
+        setRhFactor(personalDataInstance.rh_factor || '');
+
+        // Update non-editable fields
+        setEmail(personalDataInstance.email || 'Não informado');
+        setDocument(personalDataInstance.document || 'Não informado');
+        setRg(personalDataInstance.rg || 'Não informado');
+        setPhone(personalDataInstance.phone || 'Não informado');
+        setCtps(personalDataInstance.ctps || 'Não informado');
+        setAdmissionDate(personalDataInstance.admission_date || 'Não informado');
+        setGroup(personalDataInstance.group || null);
+        setRole(personalDataInstance.role || null);
+
       } catch (error: any) {
         console.error('Erro ao buscar dados pessoais:', error.message);
         Alert.alert('Erro', 'Não foi possível carregar os dados pessoais.');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchPersonalData();
   }, []);
 
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+    // Reset editable fields if canceling edit
+    if (isEditing && personalData) {
+      setName(personalData.name || '');
+      setBirthdate(personalData.birthdate || '');
+      setRhFactor(personalData.rh_factor || '');
+    }
+  };
+
   const handleUpdate = async () => {
     try {
-      if (!accessToken) throw new Error('token de acesso ausente.');
+      if (!accessToken) throw new Error('Token de acesso ausente.');
+      if (!account) throw new Error('Conta não encontrada.');
+
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (!dateRegex.test(birthdate)) {
+      if (birthdate && !dateRegex.test(birthdate)) { // Allow empty birthdate
         Alert.alert("Erro", "Data de nascimento deve estar no formato YYYY-MM-DD");
         return;
       }
+
       const updatedData = {
         name,
         birthdate,
@@ -103,15 +124,90 @@ const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route }) => {
       const updatedPersonalData = await AuthService.updatePersonalData(accessToken, updatedData);
       Alert.alert('Sucesso', 'Dados atualizados com sucesso.');
       console.log('Dados atualizados:', updatedPersonalData);
+      setPersonalData(new PersonalDataModel(updatedPersonalData)); // Update the main personalData state
+      setIsEditing(false); // Exit edit mode
     } catch (error: any) {
       console.error('Erro ao atualizar os dados pessoais:', error.message);
-      Alert.alert('Erro', error.message);
+      let errorMessage = 'Erro ao atualizar os dados pessoais.';
+      if (error.response?.status === 403) {
+        errorMessage = 'Você não tem permissão para editar seus dados.';
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      }
+      Alert.alert('Erro', errorMessage);
     }
   };
+
+  const handleChangePassword = async () => {
+    setPasswordError('');
+    if (!newPassword || !confirmNewPassword) {
+      setPasswordError('Por favor, preencha ambos os campos de senha.');
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError('As senhas não coincidem.');
+      return;
+    }
+    if (newPassword.length < 6) { // Example: minimum password length
+      setPasswordError('A senha deve ter no mínimo 6 caracteres.');
+      return;
+    }
+
+    try {
+      if (!accessToken) throw new Error('Token de acesso ausente.');
+      await AuthService.updatePassword(accessToken, newPassword, confirmNewPassword);
+      Alert.alert('Sucesso', 'Senha alterada com sucesso. Por favor, faça login novamente.');
+      await logout(); // Logout the user
+      navigation.navigate('LoginScreen'); // Navigate to login screen
+    } catch (error: any) {
+      console.error('Erro ao alterar senha:', error.message);
+      let errorMessage = 'Erro ao alterar a senha.';
+      if (error.response?.status === 400) {
+        errorMessage = 'As senhas não coincidem ou são inválidas.';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Sessão expirada. Faça login novamente.';
+      } else if (error.response?.status === 403) {
+        errorMessage = 'Você não tem permissão para alterar a senha.';
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      }
+      Alert.alert('Erro', errorMessage);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007BFF" />
+        <Text style={styles.loadingText}>Carregando dados...</Text>
+      </View>
+    );
+  }
+
+  if (!hasPermission("view_user")) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Você não tem permissão para visualizar seus dados.</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Dados Pessoais</Text>
+
+      {canEdit && (
+        <View style={styles.buttonContainer}>
+          {!isEditing ? (
+            <Button title="Editar Dados" onPress={handleEditToggle} />
+          ) : (
+            <>
+              <Button title="Salvar Alterações" onPress={handleUpdate} />
+              <Button title="Cancelar" onPress={handleEditToggle} color="red" />
+            </>
+          )}
+        </View>
+      )}
 
       {/* Nome - Editável */}
       <Text style={styles.label}>Nome</Text>
@@ -120,7 +216,7 @@ const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route }) => {
         value={name}
         onChangeText={setName}
         placeholder="Nome"
-        editable={false}
+        editable={isEditing && canEdit}
       />
 
       {/* Email - Não editável */}
@@ -149,7 +245,7 @@ const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route }) => {
         style={styles.input}
         value={rhFactor}
         onChangeText={setRhFactor}
-        editable={false}
+        editable={isEditing && canEdit}
         placeholder="Fator RH"
       />
 
@@ -159,7 +255,6 @@ const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route }) => {
 
       {/* Data de Nascimento - Editável */}
       <Text style={styles.label}>Data de Nascimento</Text>
-
       <TextInput
         style={styles.input}
         value={birthdate}
@@ -170,11 +265,41 @@ const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ route }) => {
           }
           setBirthdate(cleaned);
         }}
-        placeholder="Data de Nascimento (AAAA-MM-DD)"
+        placeholder="AAAA-MM-DD"
         keyboardType="numeric"
+        editable={isEditing && canEdit}
       />
 
-      <Button title="Salvar Alterações" onPress={handleUpdate} />
+      {/* Group - Não editável */}
+      <Text style={styles.label}>Grupo</Text>
+      <Text style={styles.nonEditableField}>{group?.name || 'Não informado'}</Text>
+
+      {/* Role - Não editável */}
+      <Text style={styles.label}>Função</Text>
+      <Text style={styles.nonEditableField}>{role?.name || 'Não informado'}</Text>
+
+      {/* Seção de Alteração de Senha */}
+      <View style={styles.passwordSection}>
+        <Text style={styles.sectionTitle}>Alterar Senha</Text>
+        <Text style={styles.label}>Nova Senha</Text>
+        <TextInput
+          style={styles.input}
+          value={newPassword}
+          onChangeText={setNewPassword}
+          secureTextEntry
+          placeholder="Nova Senha"
+        />
+        <Text style={styles.label}>Confirmar Nova Senha</Text>
+        <TextInput
+          style={styles.input}
+          value={confirmNewPassword}
+          onChangeText={setConfirmNewPassword}
+          secureTextEntry
+          placeholder="Confirmar Nova Senha"
+        />
+        {passwordError ? <Text style={styles.passwordErrorText}>{passwordError}</Text> : null}
+        <Button title="Alterar Senha" onPress={handleChangePassword} />
+      </View>
     </ScrollView>
   );
 };
@@ -221,6 +346,36 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderRadius: 5,
     backgroundColor: '#f9f9f9',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  passwordSection: {
+    marginTop: 30,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  passwordErrorText: {
+    color: 'red',
+    marginBottom: 10,
   },
 });
 

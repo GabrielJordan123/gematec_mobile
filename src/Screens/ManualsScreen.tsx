@@ -15,7 +15,7 @@ interface ManualsScreenProps {
 }
 
 const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
-  const { hasPermission, permissions } = usePermissions();
+  const { hasPermission } = usePermissions();
   const [manuals, setManuals] = useState<Manual[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
@@ -26,15 +26,7 @@ const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
 
-  if (permissions.length === 0 && loading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.emptyText}>Carregando permissões...</Text>
-      </View>
-    );
-  }
-
-  if (!hasPermission("list_manuals")) {
+  if (!hasPermission("view_manual")) {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Você não tem permissão para visualizar manuais.</Text>
@@ -49,7 +41,7 @@ const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
       if (!token) throw new Error("Token de acesso não encontrado.");
 
       const response = await ManualService.fetchManuals({
-        token,
+        accessToken: token,
         page,
         perPage,
         search: search.length >= 3 ? search : "",
@@ -60,7 +52,7 @@ const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
       setTotalPages(Math.ceil(response.count / perPage) || 1);
     } catch (error: any) {
       console.error("[ManualsScreen] Erro ao buscar manuais:", error);
-      Alert.alert("Erro", "Não foi possível carregar os manuais.");
+      Alert.alert("Erro", error.message || "Não foi possível carregar os manuais.");
     } finally {
       setLoading(false);
     }
@@ -75,9 +67,22 @@ const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
       setCategories(response);
     } catch (error: any) {
       console.error("[ManualsScreen] Erro ao buscar categorias:", error);
-      Alert.alert("Erro", "Não foi possível carregar as categorias.");
+      Alert.alert("Erro", error.message || "Não foi possível carregar as categorias.");
     } finally {
       setLoadingCategories(false);
+    }
+  };
+
+  const handleDownload = async (manual: Manual) => {
+    try {
+      const token = await AsyncStorage.getItem("access_token");
+      if (!token) throw new Error("Token de acesso não encontrado.");
+      if (!manual.file_url) throw new Error("URL do arquivo não disponível.");
+      const fileUri = await ManualService.downloadManual(manual.file_url, token);
+      Alert.alert("Sucesso", `Manual baixado em: ${fileUri}`);
+    } catch (error: any) {
+      console.error("[ManualsScreen] Erro ao baixar manual:", error);
+      Alert.alert("Erro", error.message || "Não foi possível baixar o manual.");
     }
   };
 
@@ -97,7 +102,7 @@ const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
   const renderManualItem = ({ item }: { item: Manual }) => (
     <TouchableOpacity
       style={styles.itemContainer}
-      onPress={() => navigation.navigate("ManualDetailsScreen", { manualId: item.id })}
+      onPress={() => handleDownload(item)}
     >
       <Text style={styles.itemText}>Manual: {item.name}</Text>
       <Text style={styles.itemText}>Categoria: {item.category.name}</Text>
@@ -107,16 +112,14 @@ const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Manuais</Text>
-
       <TextInput
         style={styles.input}
-        placeholder="Pesquisar manual (min 3 caracteres)"
-        placeholderTextColor="#666" // <--- Adicionado
+        placeholder="Pesquisar manual (mín. 3 caracteres)"
+        placeholderTextColor="#666"
         value={search}
         onChangeText={setSearch}
         onSubmitEditing={handleSearch}
       />
-
       {loadingCategories ? (
         <ActivityIndicator size="small" color="#007BFF" />
       ) : (
@@ -126,7 +129,7 @@ const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
             setSelectedCategory(value);
             setPage(1);
           }}
-          style={styles.picker}
+          style={[styles.picker, { backgroundColor: '#fff' }]}
         >
           <Picker.Item label="Todas as Categorias" value="" />
           {categories.map((category) => (
@@ -134,7 +137,6 @@ const ManualsScreen: React.FC<ManualsScreenProps> = ({ navigation }) => {
           ))}
         </Picker>
       )}
-
       {loading ? (
         <ActivityIndicator size="large" color="#007BFF" />
       ) : (
@@ -186,17 +188,20 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 15,
+    backgroundColor: "#fff",
   },
   picker: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
     marginBottom: 15,
+    backgroundColor: "#fff",
   },
   itemContainer: {
     padding: 15,
     borderBottomWidth: 1,
     borderColor: "#ccc",
+    backgroundColor: "#fff",
   },
   itemText: {
     fontSize: 14,

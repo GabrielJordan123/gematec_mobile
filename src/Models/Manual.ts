@@ -7,5 +7,5 @@ export interface Manual {
     id: number;
     name: string;
     category: Category;
-    content?: string;
+    file_url: string; // Added for download functionality
 }

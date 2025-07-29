@@ -9,6 +9,8 @@ export default class PersonalData {
     rh_factor: string | null;
     birthdate: string | null;
     admission_date: string | null;
+    group: any | null; // Adicionado
+    role: any | null; // Adicionado
   
     constructor(data: any) {
       this.id = data.id;
@@ -21,6 +23,8 @@ export default class PersonalData {
       this.rh_factor = data.rh_factor || '';
       this.birthdate = data.birthdate || '';
       this.admission_date = data.admission_date || '';
+      this.group = data.group || null; // Inicializa com null se não houver
+      this.role = data.role || null;   // Inicializa com null se não houver
     }
   }
   

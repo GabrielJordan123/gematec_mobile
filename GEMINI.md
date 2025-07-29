@@ -1,38 +1,17 @@
-# Projeto: Gematec Mobile App
-
-Aplicativo desenvolvido em React Native com gerenciamento de rotas via React Navigation e armazenamento persistente usando AsyncStorage.
-
-## 🔐 Funcionalidade: "Manter-me conectado"
-
-### Objetivo
-Permitir que o usuário permaneça logado mesmo após fechar e reabrir o app, se ele tiver marcado a caixa "Manter-me conectado".
-
-### Fluxo atual de autenticação
-
-1. Após login:
-   - O token `sliding_token` é salvo no AsyncStorage.
-   - A preferência `keep_logged_in` é salva como `"true"` ou `"false"` (string).
-2. Ao abrir o app:
-   - `App.tsx` verifica o valor de `keep_logged_in` e decide se deve manter ou remover o token.
-   - Mas **o redirecionamento ainda envia o usuário para a tela `LoginScreen`, mesmo se estiver autenticado.**
-
-### Problema conhecido
-Mesmo com `sliding_token` salvo e `keep_logged_in: "true"`, o app **sempre inicia na tela de Login**, ignorando a persistência da sessão.
-
-## 🧠 Estrutura relevante
-
-- `App.tsx`: Ponto de entrada do app. Contém `useEffect` que verifica `keep_logged_in`.
-- `AppRouter.tsx`: Define as rotas. Começa com `initialRouteName="LoginScreen"`.
-- `LoginScreen.tsx`: Faz login e salva token + preferência no AsyncStorage.
-- `UserContext.tsx`: Armazena dados do usuário como `clientId`, `username`, etc.
-
-## ✅ Objetivo
-
-Implementar uma lógica de verificação no início da aplicação que:
-
-- Leia o `sliding_token` e `keep_logged_in` no `App.tsx` **ou** em um contexto de autenticação.
-- Se ambos forem válidos, **pule a LoginScreen e vá direto para `HomeScreen`** (`DrawerNavigator`).
-- Caso contrário, mantenha o fluxo atual de redirecionar para Login.
-
-
-
+ LOG  [PermissionProvider] Permissões atuais: []
+ LOG  [PermissionProvider] Permissões atuais: []
+› Reloading apps
+Android Bundled 994ms index.ts (1 module)
+ LOG  [UserContext] Calling loadPersistedData...
+ LOG  Valor de keep_logged_in carregado: true
+ LOG  [UserContext] Nenhum usuário logado encontrado. Limpando dados.
+ LOG  [UserContext] loadPersistedData finished. Setting isLoading to false.
+ LOG  Iniciando login...
+ LOG  LoginRequest: {"email": "jordan@gmail.com", "password": "74120647030"}
+ LOG  [AuthService] Endpoint de login dinâmico: http://jordan.keosstg001.xyz/api/token
+ LOG  Resposta do login: {"access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzNzk1ODQxLCJpYXQiOjE3NTM3OTQzNDEsImp0aSI6ImNjNzM0NTNkZTFmMDQxMjJiMzUxNDZlZDQzMTcyOTcwIiwidXNlcl9pZCI6MSwidXNlcl9uYW1lIjoiam9yZGFuIElJIiwiYXVkIjoiYXVkIiwiaXNzIjoiaXNzIn0.jH3cg39-YYj3EHtcHrWY1DtVblzCi-9iIqJ9fxROj2g", "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc1Mzg4MDc0MSwiaWF0IjoxNzUzNzk0MzQxLCJqdGkiOiJlMjM5ZjgwMjk2ZDU0NzU2OWVjNmJmODBiMDNkNWY1OCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImpvcmRhbiBJSSIsImF1ZCI6ImF1ZCIsImlzcyI6ImlzcyJ9.o8ZtrcSoyNmBr1QYpZUx_C480Q2cr6LUayfe4MpYtZg"}
+ LOG  [UserContext] Login realizado com sucesso: {"account": "jordan", "hasAccessToken": true, "hasRefreshToken": true, "keepLoggedIn": false}
+ LOG  Login bem-sucedido. Tokens, conta e preferência de "manter logado" salvos via UserContext.
+ LOG  Iniciando a decodificação do token...
+ LOG  Token recebido: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzNzk1ODQxLCJpYXQiOjE3NTM3OTQzNDEsImp0aSI6ImNjNzM0NTNkZTFmMDQxMjJiMzUxNDZlZDQzMTcyOTcwIiwidXNlcl9pZCI6MSwidXNlcl9uYW1lIjoiam9yZGFuIElJIiwiYXVkIjoiYXVkIiwiaXNzIjoiaXNzIn0.jH3cg39-YYj3EHtcHrWY1DtVblzCi-9iIqJ9fxROj2g
+ LOG  Payload decodificado: {"aud": "aud", "exp": 1753795841, "iat": 1753794341, "iss": "iss", "jti": "cc73453de1f04122b35146ed43172970", "token_type": "access", "user_id": 1, "user_name": "jordan II"}

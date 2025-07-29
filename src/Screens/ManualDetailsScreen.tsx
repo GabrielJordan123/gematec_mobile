@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RouteProp } from "@react-navigation/native";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { RootStackParamList } from "../Routers/AppRouter";
 import ManualService from "../Services/ManualService";
-import Markdown from "react-native-markdown-display";
-import { usePermissions } from "../Context/PermissionsContext";
 import { Manual } from "../Models/Manual";
 
 interface ManualDetailsScreenProps {
@@ -16,25 +14,8 @@ interface ManualDetailsScreenProps {
 
 const ManualDetailsScreen: React.FC<ManualDetailsScreenProps> = ({ route, navigation }) => {
     const { manualId } = route.params;
-    const { hasPermission, permissions } = usePermissions();
     const [manual, setManual] = useState<Manual | null>(null);
     const [loading, setLoading] = useState(true);
-
-    if (permissions.length === 0 && loading) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.emptyText}>Carregando permissões...</Text>
-            </View>
-        );
-    }
-
-    if (!hasPermission("view_manual")) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.errorText}>Você não tem permissão para visualizar manuais.</Text>
-            </View>
-        );
-    }
 
     useEffect(() => {
         const fetchManualDetails = async () => {
@@ -47,7 +28,7 @@ const ManualDetailsScreen: React.FC<ManualDetailsScreenProps> = ({ route, naviga
                 setManual(response);
             } catch (error: any) {
                 console.error("[ManualDetailsScreen] Erro ao buscar detalhes do manual:", error);
-                Alert.alert("Erro", "Não foi possível carregar os detalhes do manual.");
+                Alert.alert("Erro", error.message || "Não foi possível carregar os detalhes do manual.");
                 navigation.goBack();
             } finally {
                 setLoading(false);
@@ -56,6 +37,22 @@ const ManualDetailsScreen: React.FC<ManualDetailsScreenProps> = ({ route, naviga
 
         fetchManualDetails();
     }, [manualId, navigation]);
+
+    const handleDownload = async () => {
+        if (!manual?.file_url) {
+            Alert.alert("Erro", "URL do arquivo não disponível.");
+            return;
+        }
+        try {
+            const token = await AsyncStorage.getItem("access_token");
+            if (!token) throw new Error("Token de acesso não encontrado.");
+            const fileUri = await ManualService.downloadManual(manual.file_url, token);
+            Alert.alert("Sucesso", `Manual baixado em: ${fileUri}`);
+        } catch (error: any) {
+            console.error("[ManualDetailsScreen] Erro ao baixar manual:", error);
+            Alert.alert("Erro", error.message || "Não foi possível baixar o manual.");
+        }
+    };
 
     if (loading) {
         return (
@@ -82,13 +79,9 @@ const ManualDetailsScreen: React.FC<ManualDetailsScreenProps> = ({ route, naviga
                 <Text style={styles.title}>{manual.name}</Text>
             </View>
             <Text style={styles.category}>Categoria: {manual.category.name}</Text>
-            <ScrollView style={styles.content}>
-                {manual.content ? (
-                    <Markdown>{manual.content}</Markdown>
-                ) : (
-                    <Text style={styles.emptyText}>Nenhum conteúdo disponível.</Text>
-                )}
-            </ScrollView>
+            <TouchableOpacity style={styles.downloadButton} onPress={handleDownload}>
+                <Text style={styles.downloadButtonText}>Baixar Manual</Text>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -125,14 +118,16 @@ const styles = StyleSheet.create({
         color: "#555",
         marginBottom: 15,
     },
-    content: {
-        flex: 1,
+    downloadButton: {
+        backgroundColor: "#28a745",
+        padding: 15,
+        borderRadius: 5,
+        alignItems: "center",
     },
-    emptyText: {
-        textAlign: "center",
-        marginTop: 20,
+    downloadButtonText: {
+        color: "#fff",
         fontSize: 16,
-        color: "#666",
+        fontWeight: "bold",
     },
     errorText: {
         fontSize: 16,

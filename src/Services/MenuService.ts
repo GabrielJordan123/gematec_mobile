@@ -1,29 +1,40 @@
 
 import apiClient from "../Context/ApiClient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_BASE_URL } from "../config/apiConfig";
+import { setDynamicApiUrl } from "../config/apiConfig";
+import jwtDecode from "jwt-decode"; // Importação padrão
 import { MenuItem } from "../Models/MenuItem";
 
 export default class MenuService {
     static async fetchDynamicMenu(): Promise<MenuItem[]> {
         try {
-            // LOG: access_token antes de buscar o menu
             const accessToken = await AsyncStorage.getItem("access_token");
             console.log("[MenuService] access_token usado para buscar menu:", accessToken);
-            const token = await AsyncStorage.getItem("sliding_token");
-            if (!token) {
+            if (!accessToken) {
                 throw new Error("Token de acesso não encontrado.");
             }
 
-            const endpoint = `${API_BASE_URL}/me/menu?app=mobile`;
-            console.log("[MenuService] Buscando menu dinâmico do endpoint:", endpoint);
+            // Decodificar o token para obter o accountName
+            const decodedToken: any = jwtDecode(accessToken);
+            const accountName = decodedToken?.account_name || "default";
+            const dynamicBaseUrl = setDynamicApiUrl(accountName);
+            const endpoint = `/me/menu?app=mobile`;
 
-            const response = await apiClient.get(endpoint);
+            console.log("[MenuService] Buscando menu dinâmico do endpoint:", `${dynamicBaseUrl}${endpoint}`);
+
+            const response = await apiClient.get(endpoint, {
+                baseURL: dynamicBaseUrl, // Usar URL dinâmica
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
 
             console.log("[MenuService] Resposta do menu dinâmico:", response.data);
-            return response.data; // A API deve retornar diretamente um array de MenuItem
+            const menuData: MenuItem[] = response.data;
+            return menuData;
         } catch (error: any) {
             console.error("[MenuService] Erro ao buscar menu dinâmico:", error);
+            if (error.response?.status === 404) {
+                throw new Error("Endpoint de menu não encontrado. Verifique a configuração do servidor.");
+            }
             throw new Error("Não foi possível carregar o menu. Tente novamente mais tarde.");
         }
     }
