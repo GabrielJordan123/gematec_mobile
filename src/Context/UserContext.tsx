@@ -2,7 +2,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AuthService from "../Services/AuthService";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { useLanguage } from "./LanguageContext"; // Importe o useLanguage
 
 interface UserContextType {
