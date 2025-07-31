@@ -33,6 +33,8 @@ import ManualDetailsScreen from "../Screens/ManualDetailsScreen";
 import ManualsScreen from "../Screens/ManualsScreen";
 import SubSectorScreen from '../Screens/Clients/SubSectorScreen';
 import PreferencesScreen from '../Screens/PreferencesScreen'; // Importe a PreferencesScreen
+import RoadmapScreen from '../Screens/Roadmap/RoadmapScreen';
+import RoadmapActivityDetailsScreen from '../Screens/Roadmap/RoadmapActivityDetailsScreen';
 import { useUser } from '../Context/UserContext';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -80,6 +82,8 @@ export type RootStackParamList = {
   ViewResponseActivityScreen: { serviceOrderId: number; equipmentStatus: string };
   RespondOrderScreen: { serviceOrderId: number; questions: string; equipmentId?: number };
   PreferencesScreen: undefined;
+  RoadmapScreen: undefined;
+  RoadmapActivityDetails: { activity: any };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -130,6 +134,8 @@ const AppRouter: React.FC = () => {
       <Stack.Screen name="RespondOrderScreen" component={RespondOrderScreen} options={{ title: "Responder Plano de Atividade de uma Ordem de Serviço" }} />
       <Stack.Screen name="SubSectorScreen" component={SubSectorScreen} options={{ headerTitle: 'Sub-setores' }} />
       <Stack.Screen name="PreferencesScreen" component={PreferencesScreen} options={{ headerTitle: 'Preferências' }} />
+      <Stack.Screen name="RoadmapScreen" component={RoadmapScreen} options={{ headerTitle: 'Roteiro' }} />
+      <Stack.Screen name="RoadmapActivityDetails" component={RoadmapActivityDetailsScreen} options={{ headerTitle: 'Detalhes da Atividade' }} />
     </Stack.Navigator>
   );
 };

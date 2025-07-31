@@ -27,7 +27,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   // Definir os itens do menu com seus nomes de tela e ícones
   const menuItems = [
-    { label: "Roteiro", icon: "map", screen: null, implemented: false },
+    { label: "Roteiro", icon: "map", screen: "RoadmapScreen", implemented: true },
     { label: "PMOC", icon: "document-text", screen: "PmocListScreen", implemented: true },
     { label: "Ordem de Serviço", icon: "hammer", screen: "ListOrderServiceScreen", implemented: true },
     { label: "Assistência Técnica", icon: "headset", screen: "TechnicalAssistanceScreen", implemented: true },
