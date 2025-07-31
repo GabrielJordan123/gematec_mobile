@@ -1,5 +1,6 @@
+import axios from "axios";
+import { buildApiUrlForAccount } from "../config/apiConfig";
 import { RoadmapResponse, RoadmapActivity } from '../Models/Roadmap';
-import { apiClient } from '../config/apiClient';
 
 export class RoadmapService {
   /**
@@ -7,11 +8,33 @@ export class RoadmapService {
    */
   static async getCurrentRoadmap(): Promise<RoadmapResponse> {
     try {
-      const response = await apiClient.get('/roadmaps/current');
+      // Montar a URL dinâmica com o subdomínio da conta
+      const apiUrl = await buildApiUrlForAccount();
+      const endpoint = `${apiUrl}/roadmaps/current`;
+      console.log('[RoadmapService] Endpoint de roteiro atual:', endpoint);
+      
+      const response = await axios.get(endpoint);
       return response.data;
     } catch (error: any) {
-      console.error('Erro ao buscar roteiro atual:', error);
-      throw new Error(error.response?.data?.message || 'Erro ao carregar roteiro');
+      console.error('[RoadmapService] Erro ao buscar roteiro atual:', error);
+      
+      if (error.response) {
+        if (error.response.status === 401) {
+          throw new Error('Token inválido ou expirado.');
+        } else if (error.response.status === 403) {
+          throw new Error('Permissão negada.');
+        } else if (error.response.status === 404) {
+          throw new Error('Endpoint não encontrado.');
+        } else if (error.response.status === 500) {
+          throw new Error('Erro interno do servidor. Tente novamente mais tarde.');
+        } else {
+          throw new Error(`Erro inesperado: ${error.response.status}.`);
+        }
+      } else if (error.request) {
+        throw new Error('Erro ao conectar ao servidor. Verifique sua conexão com a internet.');
+      } else {
+        throw new Error(`Erro inesperado: ${error.message}`);
+      }
     }
   }
 
@@ -20,11 +43,32 @@ export class RoadmapService {
    */
   static async getRoadmapByDate(date: string): Promise<RoadmapResponse> {
     try {
-      const response = await apiClient.get(`/roadmaps/${date}`);
+      const apiUrl = await buildApiUrlForAccount();
+      const endpoint = `${apiUrl}/roadmaps/${date}`;
+      console.log('[RoadmapService] Endpoint de roteiro por data:', endpoint);
+      
+      const response = await axios.get(endpoint);
       return response.data;
     } catch (error: any) {
-      console.error('Erro ao buscar roteiro por data:', error);
-      throw new Error(error.response?.data?.message || 'Erro ao carregar roteiro');
+      console.error('[RoadmapService] Erro ao buscar roteiro por data:', error);
+      
+      if (error.response) {
+        if (error.response.status === 401) {
+          throw new Error('Token inválido ou expirado.');
+        } else if (error.response.status === 403) {
+          throw new Error('Permissão negada.');
+        } else if (error.response.status === 404) {
+          throw new Error('Endpoint não encontrado.');
+        } else if (error.response.status === 500) {
+          throw new Error('Erro interno do servidor. Tente novamente mais tarde.');
+        } else {
+          throw new Error(`Erro inesperado: ${error.response.status}.`);
+        }
+      } else if (error.request) {
+        throw new Error('Erro ao conectar ao servidor. Verifique sua conexão com a internet.');
+      } else {
+        throw new Error(`Erro inesperado: ${error.message}`);
+      }
     }
   }
 
@@ -33,13 +77,32 @@ export class RoadmapService {
    */
   static async updateActivityStatus(activityId: number, status: RoadmapActivity['status']): Promise<RoadmapActivity> {
     try {
-      const response = await apiClient.patch(`/roadmaps/activities/${activityId}/status`, {
-        status
-      });
+      const apiUrl = await buildApiUrlForAccount();
+      const endpoint = `${apiUrl}/roadmaps/activities/${activityId}/status`;
+      console.log('[RoadmapService] Endpoint de atualização de status:', endpoint);
+      
+      const response = await axios.patch(endpoint, { status });
       return response.data;
     } catch (error: any) {
-      console.error('Erro ao atualizar status da atividade:', error);
-      throw new Error(error.response?.data?.message || 'Erro ao atualizar atividade');
+      console.error('[RoadmapService] Erro ao atualizar status da atividade:', error);
+      
+      if (error.response) {
+        if (error.response.status === 401) {
+          throw new Error('Token inválido ou expirado.');
+        } else if (error.response.status === 403) {
+          throw new Error('Permissão negada.');
+        } else if (error.response.status === 404) {
+          throw new Error('Atividade não encontrada.');
+        } else if (error.response.status === 500) {
+          throw new Error('Erro interno do servidor. Tente novamente mais tarde.');
+        } else {
+          throw new Error(`Erro inesperado: ${error.response.status}.`);
+        }
+      } else if (error.request) {
+        throw new Error('Erro ao conectar ao servidor. Verifique sua conexão com a internet.');
+      } else {
+        throw new Error(`Erro inesperado: ${error.message}`);
+      }
     }
   }
 
@@ -48,13 +111,32 @@ export class RoadmapService {
    */
   static async addActivityNotes(activityId: number, notes: string): Promise<RoadmapActivity> {
     try {
-      const response = await apiClient.patch(`/roadmaps/activities/${activityId}/notes`, {
-        notes
-      });
+      const apiUrl = await buildApiUrlForAccount();
+      const endpoint = `${apiUrl}/roadmaps/activities/${activityId}/notes`;
+      console.log('[RoadmapService] Endpoint de adição de notas:', endpoint);
+      
+      const response = await axios.patch(endpoint, { notes });
       return response.data;
     } catch (error: any) {
-      console.error('Erro ao adicionar notas à atividade:', error);
-      throw new Error(error.response?.data?.message || 'Erro ao adicionar notas');
+      console.error('[RoadmapService] Erro ao adicionar notas à atividade:', error);
+      
+      if (error.response) {
+        if (error.response.status === 401) {
+          throw new Error('Token inválido ou expirado.');
+        } else if (error.response.status === 403) {
+          throw new Error('Permissão negada.');
+        } else if (error.response.status === 404) {
+          throw new Error('Atividade não encontrada.');
+        } else if (error.response.status === 500) {
+          throw new Error('Erro interno do servidor. Tente novamente mais tarde.');
+        } else {
+          throw new Error(`Erro inesperado: ${error.response.status}.`);
+        }
+      } else if (error.request) {
+        throw new Error('Erro ao conectar ao servidor. Verifique sua conexão com a internet.');
+      } else {
+        throw new Error(`Erro inesperado: ${error.message}`);
+      }
     }
   }
 }
